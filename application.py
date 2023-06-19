@@ -45,7 +45,7 @@ def login():
 
                 if librarian:
                     print("Logged in as librarian")
-                    librarian_menu(connection)
+                    librarian_menu(connection, username)
                 else:
                     query = "SELECT * FROM user WHERE username = %s AND password = %s"
                     cursor.execute(query, (username, password))
@@ -61,7 +61,7 @@ def login():
             print("Error occurred during login:", e)
 
 
-def librarian_menu(connection):
+def librarian_menu(connection, username):
     while True:
         print("Menu:")
         print("1. Books")
@@ -69,7 +69,7 @@ def librarian_menu(connection):
         choice = input("Enter your choice: ")
 
         if choice == "1":
-            librarian_books_menu(connection)
+            librarian_books_menu(connection,username)
         elif choice == "2":
             print("Logged out")
             break
@@ -77,7 +77,7 @@ def librarian_menu(connection):
             print("Invalid choice. Please try again.")
 
 
-def librarian_books_menu(connection):
+def librarian_books_menu(connection, username):
     while True:
         print("Books Menu:")
         print("1. Add Book")
@@ -85,21 +85,68 @@ def librarian_books_menu(connection):
         print("3. View Book")
         print("4. Go Back")
         choice = input("Enter your choice: ")
+        if choice != "1":
+            book_id = input("Enter the Book ID: ")
 
         if choice == "1":
-            book_id = input("Enter the Book ID to add: ")
-            add_book(connection, book_id)
+            create_book(connection, username)
         elif choice == "2":
-            book_id = input("Enter the Book ID to delete: ")
             # delete_book(connection, book_id)
             delete_item(connection, "book", book_id)
         elif choice == "3":
-            book_id = input("Enter the Book ID to view: ")
             view_item(connection, "book", book_id)
         elif choice == "4":
             break
         else:
             print("Invalid choice. Please try again.")
+
+def create_book(connection, username):
+    try:
+        with connection.cursor() as cursor:
+            title = input("Enter the title: ")
+            author = input("Enter the authorID: ")
+            
+            # Check if the author exists
+            query = "SELECT * FROM author WHERE first_last_name = %s"
+            cursor.execute(query, (author,))
+            result = cursor.fetchone()
+            
+            if not result:
+                print("Author not found in the database. Please create the author before creating a book.")
+                return
+            
+            num_pages = int(input("Enter the number of pages: "))
+            publication_year = int(input("Enter the publication year: "))
+            book_genre = input("Enter the genre name: ")
+            
+            # Check if the genre exists
+            query = "SELECT * FROM genre WHERE name = %s"
+            cursor.execute(query, (book_genre,))
+            result = cursor.fetchone()
+            
+            if not result:
+                print("Genre not found in the database. Please create the genre before creating a book.")
+                return
+            
+            librarian_username = username
+
+            # Check if the book already exists
+            query = "SELECT * FROM book WHERE title = %s AND author = %s"
+            cursor.execute(query, (title, author))
+            result = cursor.fetchone()
+
+            if result:
+                print("The book already exists in the database.")
+                return
+
+            query = "INSERT INTO book (title, author, num_pages, publication_year, book_genre, librarian_username) " \
+                    "VALUES (%s, %s, %s, %s, %s, %s)"
+            cursor.execute(query, (title, author, num_pages, publication_year, book_genre, librarian_username))
+            connection.commit()
+            print("Book created successfully")
+    except Exception as e:
+        print("Error occurred while creating the book:", e)
+
 
 
 def add_book(connection, book_id):
@@ -124,6 +171,8 @@ def delete_book(connection, book_id):
 
     except Exception as e:
         print("Error occurred while deleting the book:", e)
+
+
 
 def view_item(connection, entity, id):
     table_name, id_column = table_mapping.get(entity)
@@ -191,7 +240,7 @@ def user_books_menu(connection, username):
             print("Invalid choice. Please try again.")
 
 
-def view_books(connection, username):
+def view_books(connection, username): # change to view  user
     try:
         with connection.cursor() as cursor:
             query = "SELECT book.* FROM book JOIN book_user ON book.bookId = book_user.bookId WHERE book_user.username = %s"
