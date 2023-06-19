@@ -21,7 +21,15 @@ def connect_to_database():
     except pymysql.Error as e:
         print("Failed to connect to the database:", e)
 
+table_mapping = {
+    "book": ("book", "bookId"),
+    "review": ("reviews", "reviewId"),
+    "book_club": ("book_clubs", "club_name"),
+    "author": ("authors", "first_last_name"),
+    "genre": ("genres", "name"),
+}
 
+# view book for user is from book_user table
 def login():
     connection = connect_to_database()
 
@@ -74,7 +82,8 @@ def librarian_books_menu(connection):
         print("Books Menu:")
         print("1. Add Book")
         print("2. Delete Book")
-        print("3. Go Back")
+        print("3. View Book")
+        print("4. Go Back")
         choice = input("Enter your choice: ")
 
         if choice == "1":
@@ -82,8 +91,12 @@ def librarian_books_menu(connection):
             add_book(connection, book_id)
         elif choice == "2":
             book_id = input("Enter the Book ID to delete: ")
-            delete_book(connection, book_id)
+            # delete_book(connection, book_id)
+            delete_item(connection, "book", book_id)
         elif choice == "3":
+            book_id = input("Enter the Book ID to view: ")
+            view_item(connection, "book", book_id)
+        elif choice == "4":
             break
         else:
             print("Invalid choice. Please try again.")
@@ -111,6 +124,40 @@ def delete_book(connection, book_id):
 
     except Exception as e:
         print("Error occurred while deleting the book:", e)
+
+def view_item(connection, entity, id):
+    table_name, id_column = table_mapping.get(entity)
+    if table_name and id_column:
+        try:
+            with connection.cursor() as cursor:
+                query = f"SELECT * FROM {table_name} WHERE {id_column} = %s"
+                cursor.execute(query, (id,))
+                item = cursor.fetchone()
+
+                if item:
+                    print("Item Details:")
+                    for key, value in item.items():
+                        print(f"{key}: {value}")
+                else:
+                    print("Item not found")
+        except Exception as e:
+            print("Error occurred while viewing the item:", e)
+    else:
+        print("Invalid entity. Please try again.")
+
+def delete_item(connection, entity, key):
+    table_name, id_column = table_mapping.get(entity)
+    if table_name and id_column:
+        try:
+            with connection.cursor() as cursor:
+                query = f"DELETE FROM {table_name} WHERE {id_column} = %s"
+                cursor.execute(query, (key,))
+                connection.commit()
+                print("Item deleted successfully")
+        except Exception as e:
+            print("Error occurred while deleting the item:", e)
+    else:
+        print("Invalid entity. Please try again.")
 
 
 def user_menu(connection, username):
