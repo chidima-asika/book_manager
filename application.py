@@ -103,5 +103,3 @@ def add_book(book_id, username):
         print("Error occurred while adding the book:", e)
 
 login()
-
-connection.close()
