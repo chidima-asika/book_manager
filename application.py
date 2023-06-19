@@ -16,7 +16,7 @@ def connect_to_database():
     db_user, db_password = get_database_credentials()
 
     try:
-        connection = pymysql.connect(host=db_host, user=db_user, password=db_password, db=db_name)
+        connection = pymysql.connect(host=db_host, user=db_user, password=db_password, db=db_name, cursorclass=pymysql.cursors.DictCursor)
         return connection
     except pymysql.Error as e:
         print("Failed to connect to the database:", e)
@@ -124,7 +124,9 @@ def view_books(connection, username):
             if books:
                 print("Books:")
                 for book in books:
-                    print(f"Title: {book[1]}, Author: {book[2]}")
+                    # print(f"Title: {book[1]}, Author: {book[2]}")
+                    print(f"Title: {book['title']}, Author: {book['author']}")
+                    # print(row["character_name"], row['species'])
             else:
                 print("No books found")
 
