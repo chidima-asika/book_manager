@@ -24,9 +24,10 @@ def connect_to_database():
 table_mapping = {
     "book": ("book", "bookId"),
     "review": ("reviews", "reviewId"),
-    "book_club": ("book_clubs", "club_name"),
+    "book_club": ("book_club", "club_name"),
+    "book_club_members": ("book_club_members", "member"),
     "author": ("authors", "first_last_name"),
-    "genre": ("genres", "name"),
+    "genre": ("genre", "name")
 }
 
 # view book for user is from book_user table
@@ -79,8 +80,7 @@ def librarian_menu(connection, username):
             break
             # librarian_authors_menu(connection)
         elif choice == "4":
-            break
-            # librarian_genres_menu(connection)
+            genres_menu(connection)
         elif choice == "5":
             print("Logged out")
             break
@@ -98,7 +98,7 @@ def librarian_books_menu(connection, username):
         print("4. View All Books")
         print("5. Go Back")
         choice = input("Enter your choice: ")
-        if choice != "1" and choice != "4":
+        if choice not in ["1", "4", "5"]:
             book_id = input("Enter the Book ID: ")
 
         if choice == "1":
@@ -175,19 +175,19 @@ def librarian_book_clubs_menu(connection, username):
         print("5. Delete a Book Club")
         print("6. Go Back")
         choice = input("Enter your choice: ")
-        if choice != 1:
-            bc_name = input("Enter Bookclub ID: ")
+        if choice not in ["1", "3", "6"]:
+            bc_name = input("Enter Bookclub name: ")
 
         if choice == "1":
             create_book_club(connection, username)
         elif choice == "2":
-            view_item(connection, "bookclub", bc_name)
+            view_item(connection, "book_club", bc_name)
         elif choice == "3":
-            view_item(connection, "bookclub")
+            view_item(connection, "book_club")
         elif choice == "4":
             view_book_club_members(connection, bc_name)
         elif choice == "5":
-            delete_item(connection, "bookclub", bc_name)
+            delete_item(connection, "book_club", bc_name)
         elif choice == "6":
             break
         else:
@@ -245,6 +245,26 @@ def view_book_club_members(connection, club_name):
 
 #     except Exception as e:
 #         print("Error occurred while adding the book:", e)
+
+
+def genres_menu(connection):
+    while True:
+        print("Genres Menu:")
+        print("1. View a Genre")
+        print("2. View All Genres")
+        print("3. Go Back")
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            genre_name = input("Enter the genre name: ")
+            view_item(connection, "genre", genre_name)
+        elif choice == "2":
+            view_item(connection, "genre")
+        elif choice == "3":
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
 
 # _______________________ GENERAL FUNCTION _________________________#
 def view_item(connection, entity, id=None):
