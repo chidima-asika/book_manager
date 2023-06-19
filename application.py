@@ -45,12 +45,13 @@ def login():
 
                     if user:
                         print("Logged in as user")
-                        user_menu(connection, user[0])
+                        user_menu(connection)
                     else:
                         print("Invalid credentials")
 
         except Exception as e:
             print("Error occurred during login:", e)
+
 
 def librarian_menu(connection):
     while True:
@@ -61,8 +62,8 @@ def librarian_menu(connection):
         choice = input("Enter your choice: ")
 
         if choice == "1":
-            book_id = input("Enter the Book ID to delete: ")
-            delete_book(connection, book_id)
+            book_id = input("Enter the Book ID to add: ")
+            add_book(connection, book_id)
         elif choice == "2":
             book_id = input("Enter the Book ID to delete: ")
             delete_book(connection, book_id)
@@ -71,6 +72,19 @@ def librarian_menu(connection):
             break
         else:
             print("Invalid choice. Please try again.")
+
+
+def add_book(connection, book_id):
+    try:
+        with connection.cursor() as cursor:
+            query = "INSERT INTO book_user (bookId, username, status) VALUES (%s, 'librarian', 'unread')"
+            cursor.execute(query, (book_id,))
+            connection.commit()
+            print("Book added successfully")
+
+    except Exception as e:
+        print("Error occurred while adding the book:", e)
+
 
 def delete_book(connection, book_id):
     try:
@@ -83,7 +97,8 @@ def delete_book(connection, book_id):
     except Exception as e:
         print("Error occurred while deleting the book:", e)
 
-def user_menu(connection, username):
+
+def user_menu(connection):
     while True:
         print("Menu:")
         print("1. View Books")
@@ -91,15 +106,15 @@ def user_menu(connection, username):
         choice = input("Enter your choice: ")
 
         if choice == "1":
-            book_id = input("Enter the Book ID to add: ")
-            add_book(connection, book_id, username)
+            view_books(connection)
         elif choice == "2":
             print("Logged out")
             break
         else:
             print("Invalid choice. Please try again.")
 
-def add_book(connection, book_id, username):
+
+def view_books(connection):
     try:
         with connection.cursor() as cursor:
             query = "SELECT * FROM book_user"
