@@ -7,6 +7,7 @@ def get_database_credentials():
     db_password = getpass.getpass("Database Password: ")
     return db_user, db_password
 
+
 # Establish a connection to the database
 def connect_to_database():
     db_host = 'localhost'
@@ -19,6 +20,7 @@ def connect_to_database():
         return connection
     except pymysql.Error as e:
         print("Failed to connect to the database:", e)
+
 
 def login():
     connection = connect_to_database()
@@ -46,21 +48,25 @@ def login():
                         user_menu(connection, user[0])
                     else:
                         print("Invalid credentials")
-        
+
         except Exception as e:
             print("Error occurred during login:", e)
 
 def librarian_menu(connection):
     while True:
         print("Menu:")
-        print("1. Delete Book")
-        print("2. Logout")
+        print("1. Add Book")
+        print("2. Delete Book")
+        print("3. Logout")
         choice = input("Enter your choice: ")
 
         if choice == "1":
             book_id = input("Enter the Book ID to delete: ")
             delete_book(connection, book_id)
         elif choice == "2":
+            book_id = input("Enter the Book ID to delete: ")
+            delete_book(connection, book_id)
+        elif choice == "3":
             print("Logged out")
             break
         else:
@@ -73,14 +79,14 @@ def delete_book(connection, book_id):
             cursor.execute(query, (book_id,))
             connection.commit()
             print("Book deleted successfully")
-    
+
     except Exception as e:
         print("Error occurred while deleting the book:", e)
 
 def user_menu(connection, username):
     while True:
         print("Menu:")
-        print("1. Add Book")
+        print("1. View Books")
         print("2. Logout")
         choice = input("Enter your choice: ")
 
@@ -96,13 +102,20 @@ def user_menu(connection, username):
 def add_book(connection, book_id, username):
     try:
         with connection.cursor() as cursor:
-            query = "INSERT INTO book_user (bookId, username, status) VALUES (%s, %s, 'unread')"
-            cursor.execute(query, (book_id, username))
-            connection.commit()
-            print("Book added successfully")
-    
+            query = "SELECT * FROM book_user"
+            cursor.execute(query)
+            books = cursor.fetchall()
+
+            if books:
+                print("Books:")
+                for book in books:
+                    print(f"Book ID: {book['bookId']}")
+            else:
+                print("No books found")
+
     except Exception as e:
-        print("Error occurred while adding the book:", e)
+        print("Error occurred while fetching books:", e)
+
 
 # Call the login function to start the login process
 login()

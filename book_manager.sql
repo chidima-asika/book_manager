@@ -158,5 +158,10 @@ INSERT INTO book_club_members (club_name, member) VALUES
 ('PotterHeads', 'test_user'),
 ('Classics Lovers', 'jane_doe_22');
 
-
-
+INSERT INTO book_user (bookId, username, status) VALUES
+(1, 'jane_doe_22', 'Read'),
+(2, 'jane_doe_22', 'Read');
+(1, 'test_user', 'Want to Read'),
+(2, 'test_user', 'Currently Reading'),
+(3, 'test_user', 'Want to Read'),
+(4, 'test_user', 'Want to Read');
