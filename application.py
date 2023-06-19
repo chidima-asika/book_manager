@@ -1,8 +1,10 @@
 import pymysql
+import getpass
+
 
 def get_database_credentials():
     db_user = input("Database Username: ")
-    db_password = input("Database Password: ")
+    db_password = getpass.getpass("Database Password: ")
     return db_user, db_password
 
 # Establish a connection to the database
@@ -33,7 +35,7 @@ def login():
 
                 if librarian:
                     print("Logged in as librarian")
-                    librarian_menu()
+                    librarian_menu(connection)
                 else:
                     query = "SELECT * FROM user WHERE username = %s AND password = %s"
                     cursor.execute(query, (username, password))
@@ -41,14 +43,14 @@ def login():
 
                     if user:
                         print("Logged in as user")
-                        user_menu(user['username'])
+                        user_menu(connection, user[0])
                     else:
                         print("Invalid credentials")
         
         except Exception as e:
             print("Error occurred during login:", e)
 
-def librarian_menu():
+def librarian_menu(connection):
     while True:
         print("Menu:")
         print("1. Delete Book")
@@ -57,14 +59,14 @@ def librarian_menu():
 
         if choice == "1":
             book_id = input("Enter the Book ID to delete: ")
-            delete_book(book_id)
+            delete_book(connection, book_id)
         elif choice == "2":
             print("Logged out")
             break
         else:
             print("Invalid choice. Please try again.")
 
-def delete_book(book_id):
+def delete_book(connection, book_id):
     try:
         with connection.cursor() as cursor:
             query = "DELETE FROM book_user WHERE bookId = %s"
@@ -75,7 +77,7 @@ def delete_book(book_id):
     except Exception as e:
         print("Error occurred while deleting the book:", e)
 
-def user_menu(username):
+def user_menu(connection, username):
     while True:
         print("Menu:")
         print("1. Add Book")
@@ -84,14 +86,14 @@ def user_menu(username):
 
         if choice == "1":
             book_id = input("Enter the Book ID to add: ")
-            add_book(book_id, username)
+            add_book(connection, book_id, username)
         elif choice == "2":
             print("Logged out")
             break
         else:
             print("Invalid choice. Please try again.")
 
-def add_book(book_id, username):
+def add_book(connection, book_id, username):
     try:
         with connection.cursor() as cursor:
             query = "INSERT INTO book_user (bookId, username, status) VALUES (%s, %s, 'unread')"
@@ -102,4 +104,5 @@ def add_book(book_id, username):
     except Exception as e:
         print("Error occurred while adding the book:", e)
 
+# Call the login function to start the login process
 login()
