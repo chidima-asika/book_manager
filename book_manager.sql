@@ -129,9 +129,9 @@ CREATE TABLE user_review_book
 -- INSERT INTO librarian (lib_username, password, first_name, last_name) VALUES
 -- ('test_librarian', 'tester123', 'Test', 'Librarian');
 
--- INSERT INTO user (username, password, first_name, last_name) VALUES
--- ('test_user', 'tester456', 'Test', 'User'),
--- ('jane_doe_22', 'doremefaso', 'Jane', 'Doe');
+INSERT INTO user (username, password, first_name, last_name) VALUES
+('test_user', 'tester456', 'Test', 'User'),
+('jane_doe_22', 'doremefaso', 'Jane', 'Doe');
 
 -- INSERT INTO book (title, num_pages, publication_year, librarian_username) VALUES 
 -- ('The Great Gatsby', 180, 1925, 'test_librarian'),
