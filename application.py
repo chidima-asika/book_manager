@@ -56,9 +56,25 @@ def login():
 def librarian_menu(connection):
     while True:
         print("Menu:")
+        print("1. Books")
+        print("2. Logout")
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            librarian_books_menu(connection)
+        elif choice == "2":
+            print("Logged out")
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+
+def librarian_books_menu(connection):
+    while True:
+        print("Books Menu:")
         print("1. Add Book")
         print("2. Delete Book")
-        print("3. Logout")
+        print("3. Go Back")
         choice = input("Enter your choice: ")
 
         if choice == "1":
@@ -68,7 +84,6 @@ def librarian_menu(connection):
             book_id = input("Enter the Book ID to delete: ")
             delete_book(connection, book_id)
         elif choice == "3":
-            print("Logged out")
             break
         else:
             print("Invalid choice. Please try again.")
@@ -101,14 +116,29 @@ def delete_book(connection, book_id):
 def user_menu(connection, username):
     while True:
         print("Menu:")
-        print("1. View Books")
+        print("1. Books")
         print("2. Logout")
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            user_books_menu(connection, username)
+        elif choice == "2":
+            print("Logged out")
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+
+def user_books_menu(connection, username):
+    while True:
+        print("Books Menu:")
+        print("1. View Books")
+        print("2. Go Back")
         choice = input("Enter your choice: ")
 
         if choice == "1":
             view_books(connection, username)
         elif choice == "2":
-            print("Logged out")
             break
         else:
             print("Invalid choice. Please try again.")
@@ -124,14 +154,13 @@ def view_books(connection, username):
             if books:
                 print("Books:")
                 for book in books:
-                    # print(f"Title: {book[1]}, Author: {book[2]}")
                     print(f"Title: {book['title']}, Author: {book['author']}")
-                    # print(row["character_name"], row['species'])
             else:
                 print("No books found")
 
     except Exception as e:
         print("Error occurred while fetching books:", e)
+
 
 # Call the login function to start the login process
 login()
