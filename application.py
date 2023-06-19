@@ -45,7 +45,7 @@ def login():
 
                     if user:
                         print("Logged in as user")
-                        user_menu(connection)
+                        user_menu(connection, username)
                     else:
                         print("Invalid credentials")
 
@@ -98,7 +98,7 @@ def delete_book(connection, book_id):
         print("Error occurred while deleting the book:", e)
 
 
-def user_menu(connection):
+def user_menu(connection, username):
     while True:
         print("Menu:")
         print("1. View Books")
@@ -106,7 +106,7 @@ def user_menu(connection):
         choice = input("Enter your choice: ")
 
         if choice == "1":
-            view_books(connection)
+            view_books(connection, username)
         elif choice == "2":
             print("Logged out")
             break
@@ -114,23 +114,22 @@ def user_menu(connection):
             print("Invalid choice. Please try again.")
 
 
-def view_books(connection):
+def view_books(connection, username):
     try:
         with connection.cursor() as cursor:
-            query = "SELECT * FROM book_user"
-            cursor.execute(query)
+            query = "SELECT book.* FROM book JOIN book_user ON book.bookId = book_user.bookId WHERE book_user.username = %s"
+            cursor.execute(query, (username,))
             books = cursor.fetchall()
 
             if books:
                 print("Books:")
                 for book in books:
-                    print(f"Book ID: {book['bookId']}")
+                    print(f"Title: {book[1]}, Author: {book[2]}")
             else:
                 print("No books found")
 
     except Exception as e:
         print("Error occurred while fetching books:", e)
-
 
 # Call the login function to start the login process
 login()

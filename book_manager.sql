@@ -32,6 +32,13 @@ CREATE TABLE genre
 
 );
 
+CREATE TABLE author
+(
+	first_last_name VARCHAR(100) PRIMARY KEY,
+	num_books INT DEFAULT 0
+    
+);
+
 CREATE TABLE book
 (
 	bookId INT AUTO_INCREMENT PRIMARY KEY,
@@ -40,19 +47,11 @@ CREATE TABLE book
     num_pages INT NOT NULL,
     publication_year YEAR NOT NULL,
     book_genre VARCHAR(100) NOT NULL,
-    author VARCHAR(100) NOT NULL,
     librarian_username VARCHAR(30),
 
 	FOREIGN KEY (book_genre) REFERENCES genre (name),
 	FOREIGN KEY (author) REFERENCES author (first_last_name),
     FOREIGN KEY (librarian_username) REFERENCES librarian (lib_username)
-);
-
-CREATE TABLE author
-(
-	first_last_name VARCHAR(100) PRIMARY KEY,
-	num_books INT DEFAULT 0
-    
 );
 
 
@@ -135,20 +134,20 @@ INSERT INTO user (username, password, first_name, last_name) VALUES
 ('test_user', 'tester456', 'Test', 'User'),
 ('jane_doe_22', 'doremefaso', 'Jane', 'Doe');
 
+INSERT INTO author (first_last_name) VALUES 
+('F. Scott Fitzgerald'), 
+('Harper Lee'), 
+('George Orwell'),
+('J.K. Rowling');
+
+INSERT INTO genre (name) VALUES
+('Historical Fiction'), ('Science Fiction'), ('Fantasy');
+
 INSERT INTO book (title, num_pages, publication_year, book_genre, author, librarian_username) VALUES 
 ('The Great Gatsby', 180, 1925, 'Historical Fiction', 'F. Scott Fitzgerald', 'test_librarian'),
 ('To Kill a Mocking Bird', 323, 1960, 'Historical Fiction', 'Harper Lee', 'test_librarian'),
 ('1984', 368, 1949, 'Science Fiction', 'George Orwell', 'test_librarian'),
 ('Harry Potter and the Deathly Hallows', 759, 2007, 'Fantasy', 'J.K. Rowling', 'test_librarian');
-
--- INSERT INTO author VALUES 
--- ('F. Scott Fitzgerald'), 
--- ('Harper Lee'), 
--- ('George Orwell'),
--- ('J.K. Rowling');
-
--- INSERT INTO genre (name) VALUES
--- ('Historical Fiction'), ('Science Fiction'), ('Fantasy');
 
 INSERT INTO book_club (club_name, bookId, librarian) VALUES
 ('PotterHeads', 4, 'test_librarian'),
@@ -160,8 +159,9 @@ INSERT INTO book_club_members (club_name, member) VALUES
 
 INSERT INTO book_user (bookId, username, status) VALUES
 (1, 'jane_doe_22', 'Read'),
-(2, 'jane_doe_22', 'Read');
+(2, 'jane_doe_22', 'Read'),
 (1, 'test_user', 'Want to Read'),
 (2, 'test_user', 'Currently Reading'),
 (3, 'test_user', 'Want to Read'),
 (4, 'test_user', 'Want to Read');
+
