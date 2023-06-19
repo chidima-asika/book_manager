@@ -159,9 +159,9 @@ INSERT INTO book_club_members (club_name, member) VALUES
 ('Classics Lovers', 'jane_doe_22');
 
 INSERT INTO book_user (bookId, username, status) VALUES
-(1, 'test_user', 'Read'),
-(2, 'test_user', 'Read');
-(1, 'jane_doe_22', 'Want to Read'),
-(2, 'jane_doe_22', 'Currently Reading'),
-(3, 'jane_doe_22', 'Want to Read'),
-(4, 'jane_doe_22', 'Want to Read');
+(1, 'jane_doe_22', 'Read'),
+(2, 'jane_doe_22', 'Read');
+(1, 'test_user', 'Want to Read'),
+(2, 'test_user', 'Currently Reading'),
+(3, 'test_user', 'Want to Read'),
+(4, 'test_user', 'Want to Read');
