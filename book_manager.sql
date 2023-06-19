@@ -23,20 +23,6 @@ CREATE TABLE librarian
     last_name VARCHAR(30) NOT NULL
 
 );
-
-
-CREATE TABLE book
-(
-	bookId INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(100) NOT NULL,
-    num_pages INT NOT NULL,
-    publication_year YEAR NOT NULL,
-    librarian_username VARCHAR(30),
-
-	FOREIGN KEY (librarian_username) REFERENCES librarian (lib_username)
-);
-
-
 CREATE TABLE genre
 (
 	name VARCHAR(100) PRIMARY KEY,
@@ -45,6 +31,18 @@ CREATE TABLE genre
 
 );
 
+CREATE TABLE book
+(
+	bookId INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(100) NOT NULL,
+    num_pages INT NOT NULL,
+    publication_year YEAR NOT NULL,
+    book_genre
+    librarian_username VARCHAR(30),
+
+	FOREIGN KEY (genre) REFERENCES genre (name)
+    FOREIGN KEY (librarian_username) REFERENCES librarian (lib_username)
+);
 
 CREATE TABLE author
 (
@@ -88,18 +86,6 @@ CREATE TABLE book_user
     FOREIGN KEY (username) REFERENCES user (username)
     
 );
-
-
-CREATE TABLE book_genre
-(
-	bookId INT,
-    genre_name VARCHAR(100),
-    
-    FOREIGN KEY (bookId) REFERENCES book (bookId),
-    FOREIGN KEY (genre_name) REFERENCES genre (name)
-    
-);
-
 
 CREATE TABLE book_author
 (
