@@ -40,9 +40,11 @@ CREATE TABLE book
     num_pages INT NOT NULL,
     publication_year YEAR NOT NULL,
     book_genre VARCHAR(100) NOT NULL,
+    author VARCHAR(100) NOT NULL,
     librarian_username VARCHAR(30),
 
 	FOREIGN KEY (book_genre) REFERENCES genre (name),
+	FOREIGN KEY (author) REFERENCES author (first_last_name),
     FOREIGN KEY (librarian_username) REFERENCES librarian (lib_username)
 );
 
@@ -126,18 +128,18 @@ CREATE TABLE user_review_book
 
 # Data dump
 
--- INSERT INTO librarian (lib_username, password, first_name, last_name) VALUES
--- ('test_librarian', 'tester123', 'Test', 'Librarian');
+INSERT INTO librarian (lib_username, password, first_name, last_name) VALUES
+('test_librarian', 'tester123', 'Test', 'Librarian');
 
--- INSERT INTO user (username, password, first_name, last_name) VALUES
--- ('test_user', 'tester456', 'Test', 'User'),
--- ('jane_doe_22', 'doremefaso', 'Jane', 'Doe');
+INSERT INTO user (username, password, first_name, last_name) VALUES
+('test_user', 'tester456', 'Test', 'User'),
+('jane_doe_22', 'doremefaso', 'Jane', 'Doe');
 
--- INSERT INTO book (title, num_pages, publication_year, librarian_username) VALUES 
--- ('The Great Gatsby', 180, 1925, 'test_librarian'),
--- ('To Kill a Mocking Bird', 323, 1960, 'test_librarian'),
--- ('1984', 368, 1949, 'test_librarian'),
--- ('Harry Potter and the Deathly Hallows', 759, 2007, 'test_librarian');
+INSERT INTO book (title, num_pages, publication_year, book_genre, author, librarian_username) VALUES 
+('The Great Gatsby', 180, 1925, 'Historical Fiction', 'F. Scott Fitzgerald', 'test_librarian'),
+('To Kill a Mocking Bird', 323, 1960, 'Historical Fiction', 'Harper Lee', 'test_librarian'),
+('1984', 368, 1949, 'Science Fiction', 'George Orwell', 'test_librarian'),
+('Harry Potter and the Deathly Hallows', 759, 2007, 'Fantasy', 'J.K. Rowling', 'test_librarian');
 
 -- INSERT INTO author VALUES 
 -- ('F. Scott Fitzgerald'), 
@@ -145,18 +147,16 @@ CREATE TABLE user_review_book
 -- ('George Orwell'),
 -- ('J.K. Rowling');
 
-
 -- INSERT INTO genre (name) VALUES
--- ('Fiction'), ('Historical Fiction'), ('Science Fiction'), ('Fantasy');
+-- ('Historical Fiction'), ('Science Fiction'), ('Fantasy');
 
+INSERT INTO book_club (club_name, bookId, librarian) VALUES
+('PotterHeads', 4, 'test_librarian'),
+('Classics Lovers', 1, 'test_librarian');
 
--- INSERT INTO book_club (club_name, bookId, librarian) VALUES
--- ('PotterHeads', 4, 'test_librarian'),
--- ('Classics Lovers', 1, 'test_librarian');
-
--- INSERT INTO book_club_members (club_name, member) VALUES
--- ('PotterHeads', 'test_user'),
--- ('Classics Lovers', 'jane_doe_22');
+INSERT INTO book_club_members (club_name, member) VALUES
+('PotterHeads', 'test_user'),
+('Classics Lovers', 'jane_doe_22');
 
 
 
