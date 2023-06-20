@@ -8,7 +8,6 @@ def get_database_credentials():
     return db_user, db_password
 
 
-# Establish a connection to the database
 def connect_to_database():
     db_host = 'localhost'
     db_name = 'BookManager'
@@ -25,12 +24,11 @@ table_mapping = {
     "book": ("book", "bookId"),
     "review": ("reviews", "reviewId"),
     "book_club": ("book_club", "club_name"),
-    "book_club_members": ("book_club_members", "member"),
+    # "book_club_members": ("book_club_members", "member"),
     "author": ("authors", "first_last_name"),
     "genre": ("genre", "name")
 }
 
-# view book for user is from book_user table
 def login():
     connection = connect_to_database()
 
@@ -61,6 +59,8 @@ def login():
         except Exception as e:
             print("Error occurred during login:", e)
 
+# do we need to add ability to create an account?
+# for general function, still add a print statement after stating with ID was deleted
 
 def librarian_menu(connection, username):
     while True:
@@ -275,6 +275,73 @@ def genres_menu(connection):
         else:
             print("Invalid choice. Please try again.")
 
+
+def view_item(connection, entity, id=None):
+    table_name, id_column = table_mapping.get(entity)
+    if table_name and id_column:
+        try:
+            with connection.cursor() as cursor:
+                if id is None:
+                    query = f"SELECT * FROM {table_name}"
+                    cursor.execute(query)
+                    items = cursor.fetchall()
+                else:
+                    query = f"SELECT * FROM {table_name} WHERE {id_column} = %s"
+                    cursor.execute(query, (id,))
+                    items = cursor.fetchone()
+
+                if items:
+                    print("Item Details:")
+                    if isinstance(items, dict):  # Single item
+                        items = [items]
+                    for item in items:
+                        for key, value in item.items():
+                            print(f"{key}: {value}")
+                        print("-----")
+                else:
+                    print("Item not found")
+        except Exception as e:
+            print("Error occurred while viewing the item:", e)
+    else:
+        print("Invalid entity. Please try again.")
+
+
+def view_item2(connection, entity, id):
+    table_name, id_column = table_mapping.get(entity)
+    if table_name and id_column:
+        try:
+            with connection.cursor() as cursor:
+                query = f"SELECT * FROM {table_name} WHERE {id_column} = %s"
+                cursor.execute(query, (id,))
+                item = cursor.fetchone()
+
+                if item:
+                    print("Item Details:")
+                    for key, value in item.items():
+                        print(f"{key}: {value}")
+                else:
+                    print("Item not found")
+        except Exception as e:
+            print("Error occurred while viewing the item:", e)
+    else:
+        print("Invalid entity. Please try again.")
+
+def delete_item(connection, entity, key):
+    table_name, id_column = table_mapping.get(entity)
+    if table_name and id_column:
+        try:
+            with connection.cursor() as cursor:
+                query = f"DELETE FROM {table_name} WHERE {id_column} = %s"
+                cursor.execute(query, (key,))
+                connection.commit()
+                print("Item deleted successfully")
+        except Exception as e:
+            print("Error occurred while deleting the item:", e)
+    else:
+        print("Invalid entity. Please try again.")
+        # need to add validation that the entity exists
+
+# _______________________ GENERAL FUNCTION END _________________________#
 
 def user_menu(connection, username):
     while True:
