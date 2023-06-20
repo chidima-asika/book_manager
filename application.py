@@ -376,7 +376,7 @@ def user_menu(connection, username):
             user_book_clubs_menu(connection, username)
         elif choice == "4":
             break
-            user_authors_menu(connection, username)
+            authors_menu(connection, username)
         elif choice == "5":
             genres_menu(connection, username)
         elif choice == "6":
@@ -389,12 +389,12 @@ def user_menu(connection, username):
 def user_books_menu(connection, username):
     while True:
         print("Books Menu:")
-        print("1. View Books")
+        print("1. View All Books")
         print("2. Go Back")
         choice = input("Enter your choice: ")
 
         if choice == "1":
-            view_books(connection, username)
+            view_item(connection, "book")
         elif choice == "2":
             break
         else:
@@ -413,7 +413,7 @@ def user_book_clubs_menu(connection, username):
         choice = input("Enter your choice: ")
 
         if choice not in ["1", "4"]:
-            bc_name = input("Enter Bookclub name: ")
+            bc_name = input("Enter Book Club name: ")
 
         if choice == "1":
             view_item(connection, "book_club")
@@ -422,7 +422,7 @@ def user_book_clubs_menu(connection, username):
         elif choice == "3":
             view_book_club_members(connection, bc_name) 
         elif choice == "4":
-            view_book_club_user(connection, username) 
+            view_book_club_personal(connection, username) 
         elif choice == "5":
             join_book_club(connection, username, bc_name)
         elif choice == "6":
@@ -432,9 +432,9 @@ def user_book_clubs_menu(connection, username):
         else:
             print("Invalid choice. Please try again.")
 
-# _______________________ user_book_clubs_menu FUNCTIONS _________________________#
+# _______________________ unique user_book_clubs_menu FUNCTIONS _________________________#
 
-def view_book_club_user(connection, username):
+def view_book_club_personal(connection, username):
     try:
         with connection.cursor() as cursor:
             query = "SELECT club_name FROM book_club_members WHERE member = %s"
@@ -442,11 +442,11 @@ def view_book_club_user(connection, username):
             book_clubs = cursor.fetchall()
 
             if book_clubs:
-                print(f"Hi {username}, your Book Clubs are:")
+                print(f"Books Clubs {username} is a member of:")
                 for book_club in book_clubs:
                     print(book_club["club_name"])
             else:
-                print("No book clubs found for under your username")
+                print("No book clubs found for your username")
 
     except Exception as e:
         print("Error occurred while fetching book clubs:", e)
@@ -490,6 +490,6 @@ def leave_book_club(connection, username, bc_name):
     except Exception as e:
         print("Error occurred while leaving the book club:", e)
 
-# _______________________ user_book_clubs_menu FUNCTIONS END _________________________#
+# _______________________ unique user_book_clubs_menu FUNCTIONS END _________________________#
 
 login()
