@@ -337,12 +337,26 @@ def user_menu(connection, username):
     while True:
         print("Menu:")
         print("1. Books")
-        print("2. Logout")
+        print("2. Reviews")
+        print("3. Book Clubs")
+        print("4. Authors")
+        print("5. Genres")
+        print("6. Logout")
         choice = input("Enter your choice: ")
 
         if choice == "1":
             user_books_menu(connection, username)
         elif choice == "2":
+            break
+            user_reviews_menu(connection, username)
+        elif choice == "3":
+            user_book_clubs_menu(connection, username)
+        elif choice == "4":
+            break
+            user_authors_menu(connection, username)
+        elif choice == "5":
+            genres_menu(connection, username)
+        elif choice == "6":
             print("Logged out")
             break
         else:
@@ -363,24 +377,96 @@ def user_books_menu(connection, username):
         else:
             print("Invalid choice. Please try again.")
 
+def user_book_clubs_menu(connection, username):
+    while True:
+        print("Book Clubs Menu:")
+        print("1. View All Book Clubs")
+        print("2. View a Book Clubs")
+        print("3. View Book Club Members")
+        print("4. View your Book Clubs")
+        print("5. Join a Book Club")
+        print("6. Leave a Book Club")
+        print("7. Go Back")
+        choice = input("Enter your choice: ")
 
-def view_books(connection, username): # change to view  user
+        if choice not in ["1", "4"]:
+            bc_name = input("Enter Bookclub name: ")
+
+        if choice == "1":
+            view_item(connection, "book_club")
+        elif choice == "2":
+            view_item(connection, "book_club", bc_name)
+        elif choice == "3":
+            view_book_club_members(connection, bc_name) 
+        elif choice == "4":
+            view_book_club_user(connection, username) 
+        elif choice == "5":
+            join_book_club(connection, username, bc_name)
+        elif choice == "6":
+            leave_book_club(connection, username, bc_name)
+        elif choice == "7":
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+# _______________________ user_book_clubs_menu FUNCTIONS _________________________#
+
+def view_book_club_user(connection, username):
     try:
         with connection.cursor() as cursor:
-            query = "SELECT book.* FROM book JOIN book_user ON book.bookId = book_user.bookId WHERE book_user.username = %s"
+            query = "SELECT club_name FROM book_club_members WHERE member = %s"
             cursor.execute(query, (username,))
-            books = cursor.fetchall()
+            book_clubs = cursor.fetchall()
 
-            if books:
-                print("Books:")
-                for book in books:
-                    print(f"Title: {book['title']}, Author: {book['author']}")
+            if book_clubs:
+                print(f"Hi {username}, your Book Clubs are:")
+                for book_club in book_clubs:
+                    print(book_club["club_name"])
             else:
-                print("No books found")
+                print("No book clubs found for under your username")
 
     except Exception as e:
-        print("Error occurred while fetching books:", e)
+        print("Error occurred while fetching book clubs:", e)
 
 
-# Call the login function to start the login process
+def join_book_club(connection, username, bc_name):
+    try:
+        with connection.cursor() as cursor:
+            # Check if the user is already a member of the book club
+            query = "SELECT club_name FROM book_club_members WHERE club_name = %s AND member = %s"
+            cursor.execute(query, (bc_name, username))
+            result = cursor.fetchone()
+
+            if result:
+                print("You are already a member of this book club")
+            else:
+                # Add the user as a member of the book club
+                query = "INSERT INTO book_club_members (club_name, member) VALUES (%s, %s)"
+                cursor.execute(query, (bc_name, username))
+                connection.commit()
+                print(f"Joined the book club {bc_name} successfully")
+
+    except Exception as e:
+        print("Error occurred while joining the book club:", e)
+
+def leave_book_club(connection, username, bc_name):
+    try:
+        with connection.cursor() as cursor:
+            query = "SELECT club_name FROM book_club_members WHERE club_name = %s AND member = %s"
+            cursor.execute(query, (bc_name, username))
+            result = cursor.fetchone()
+
+            if result:
+                query = "DELETE FROM book_club_members WHERE club_name = %s AND member = %s"
+                cursor.execute(query, (bc_name, username))
+                connection.commit()
+                print(f"Left the book club {bc_name} successfully")
+            else:
+                print(f"You are not a member of the {bc_name} book club")
+
+    except Exception as e:
+        print("Error occurred while leaving the book club:", e)
+
+# _______________________ user_book_clubs_menu FUNCTIONS END _________________________#
+
 login()
