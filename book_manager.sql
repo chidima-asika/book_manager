@@ -155,6 +155,7 @@ INSERT INTO book_club (club_name, bookId, librarian) VALUES
 
 INSERT INTO book_club_members (club_name, member) VALUES
 ('PotterHeads', 'test_user'),
+('PotterHeads', 'jane_doe_22'),
 ('Classics Lovers', 'jane_doe_22');
 
 INSERT INTO book_user (bookId, username, status) VALUES
