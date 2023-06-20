@@ -179,7 +179,7 @@ def librarian_book_clubs_menu(connection, username):
         print("6. Go Back")
         choice = input("Enter your choice: ")
         if choice not in ["1", "3", "6"]:
-            bc_name = input("Enter Bookclub name: ")
+            bc_name = input("Enter Book Club name: ")
 
         if choice == "1":
             create_book_club(connection, username)
@@ -238,17 +238,6 @@ def view_book_club_members(connection, club_name):
 
 # _______________________ unique librarian_book_clubs_menu FUNCTIONS END _________________________#
 
-# def add_book(connection, book_id):
-#     try:
-#         with connection.cursor() as cursor:
-#             query = "INSERT INTO book_user (bookId, username, status) VALUES (%s, 'librarian', 'unread')"
-#             cursor.execute(query, (book_id,))
-#             connection.commit()
-#             print("Book added successfully")
-
-#     except Exception as e:
-#         print("Error occurred while adding the book:", e)
-
 
 def authors_menu(connection):
     while True:
@@ -287,75 +276,6 @@ def genres_menu(connection):
             print("Invalid choice. Please try again.")
 
 
-# _______________________ GENERAL FUNCTIONS _________________________#
-
-def view_item(connection, entity, id=None):
-    table_name, id_column = table_mapping.get(entity)
-    if table_name and id_column:
-        try:
-            with connection.cursor() as cursor:
-                if id is None:
-                    query = f"SELECT * FROM {table_name}"
-                    cursor.execute(query)
-                    items = cursor.fetchall()
-                else:
-                    query = f"SELECT * FROM {table_name} WHERE {id_column} = %s"
-                    cursor.execute(query, (id,))
-                    items = cursor.fetchone()
-
-                if items:
-                    print("Item Details:")
-                    if isinstance(items, dict):  # single item
-                        items = [items]
-                    for item in items:
-                        for key, value in item.items():
-                            print(f"{key}: {value}")
-                        print("-----")
-                else:
-                    print("Item not found")
-        except Exception as e:
-            print("Error occurred while viewing the item:", e)
-    else:
-        print("Invalid entity or id. Please try again.")
-
-# =============================================================================
-# def view_item2(connection, entity, id):
-#     table_name, id_column = table_mapping.get(entity)
-#     if table_name and id_column:
-#         try:
-#             with connection.cursor() as cursor:
-#                 query = f"SELECT * FROM {table_name} WHERE {id_column} = %s"
-#                 cursor.execute(query, (id,))
-#                 item = cursor.fetchone()
-# 
-#                 if item:
-#                     print("Item Details:")
-#                     for key, value in item.items():
-#                         print(f"{key}: {value}")
-#                 else:
-#                     print("Item not found")
-#         except Exception as e:
-#             print("Error occurred while viewing the item:", e)
-#     else:
-#         print("Invalid entity or id. Please try again.")
-# =============================================================================
-
-def delete_item(connection, entity, id):
-    table_name, id_column = table_mapping.get(entity)
-    if table_name and id_column:
-        try:
-            with connection.cursor() as cursor:
-                query = f"DELETE FROM {table_name} WHERE {id_column} = %s"
-                cursor.execute(query, (id,))
-                connection.commit()
-                print("Item deleted successfully")
-        except Exception as e:
-            print("Error occurred while deleting the item:", e)
-    else:
-        print("Invalid entity or id. Please try again.")
-
-# _______________________ GENERAL FUNCTIONS END _________________________#
-
 def user_menu(connection, username):
     while True:
         print("Menu:")
@@ -390,15 +310,110 @@ def user_books_menu(connection, username):
     while True:
         print("Books Menu:")
         print("1. View All Books")
-        print("2. Go Back")
+        print("2. View a Book")
+        print("3. Add a Book")
+        print("4. View your Books")
+        print("5. Update Status of your Book")
+        print("6. Delete a book from your Books")
+        print("7. Go Back")
         choice = input("Enter your choice: ")
+
+        if choice not in ["1", "4"]:
+            book_id = input("Enter book id: ")
 
         if choice == "1":
             view_item(connection, "book")
         elif choice == "2":
             break
+            view_item(connection, "book", book_id)
+        elif choice == "3":
+            break
+            add_book(connection, username, book_id)
+            update_status(connection, username, book_id)
+        elif choice == "4":
+            break
+            view_book_user(connection, username)
+        elif choice == "5":
+            break
+            update_status(connection, username, book_id)
+        # elif choice == "6":
+        #     break
+        elif choice == "7":
+            break
         else:
             print("Invalid choice. Please try again.")
+
+# _______________________ unique user_books_menu FUNCTIONS _________________________#
+
+
+def add_book(connection, book_id):
+    try:
+        with connection.cursor() as cursor:
+            query = "INSERT INTO book_user (bookId, username) VALUES (%s, '%')"
+            cursor.execute(query, (book_id,))
+            connection.commit()
+            print("Book added successfully")
+
+    except Exception as e:
+        print("Error occurred while adding the book:", e)
+
+
+def view_book_user(connection, username):
+    try:
+        with connection.cursor() as cursor:
+            query = "SELECT * FROM book_user WHERE username = %s"
+            cursor.execute(query, (username,))
+            books = cursor.fetchall()
+
+            if books:
+                print("Your Books:")
+                for book in books:
+                    print("Book ID:", book["bookId"])
+                    print("Status:", book["status"])
+                    print("-----")
+            else:
+                print(f"No books found for {username}")
+
+    except Exception as e:
+        print("Error occurred while fetching user books:", e)
+
+
+def update_status(connection, username, book_id):
+    try:
+        with connection.cursor() as cursor:
+            print("Book Status Options:")
+            print("1: Read")
+            print("2: Currently Reading")
+            print("3: Want to Read")
+
+            book_status = input("Enter your choice: ")
+
+            if book_status == "1":
+                status = "Read"
+            elif book_status == "2":
+                status = "Currently Reading"
+            elif book_status == "3":
+                status = "Want to Read"
+            else:
+                print("Invalid choice. Please try again.")
+                return
+
+            query = "UPDATE book_user SET status = %s WHERE username = %s AND bookId = %s"
+            cursor.execute(query, (status, username, book_id))
+            connection.commit()
+
+            if cursor.rowcount > 0:
+                print("Status updated successfully")
+            else:
+                print("No book found for the provided username and book ID")
+
+    except Exception as e:
+        print("Error occurred while updating book status:", e)
+
+
+
+# _______________________ unique user_books_menu FUNCTIONS END _________________________#
+
 
 def user_book_clubs_menu(connection, username):
     while True:
@@ -491,5 +506,105 @@ def leave_book_club(connection, username, bc_name):
         print("Error occurred while leaving the book club:", e)
 
 # _______________________ unique user_book_clubs_menu FUNCTIONS END _________________________#
+
+
+# =============================================================================
+# def user_reviews_menu(connection, username):
+#     while True:
+#         print("Reviews Menu:")
+#         print("1. View All Reviews")
+#         print("2. View a Review")
+#         print("3. Write a Review")
+#         choice = input("Enter your choice: ")
+# 
+#         if choice not in ["1", "4"]:
+#             bc_name = input("Enter Book Club name: ")
+# 
+#         if choice == "1":
+#             view_item(connection, "book_club")
+#         elif choice == "2":
+#             view_item(connection, "book_club", bc_name)
+#         elif choice == "3":
+#             view_book_club_members(connection, bc_name) 
+#         elif choice == "4":
+#             view_book_club_personal(connection, username) 
+#         elif choice == "5":
+#             join_book_club(connection, username, bc_name)
+#         elif choice == "6":
+#             leave_book_club(connection, username, bc_name)
+#         elif choice == "7":
+#             break
+#         else:
+#             print("Invalid choice. Please try again.")
+# =============================================================================
+
+# _______________________ GENERAL FUNCTIONS _________________________#
+
+def view_item(connection, entity, id=None):
+    table_name, id_column = table_mapping.get(entity)
+    if table_name and id_column:
+        try:
+            with connection.cursor() as cursor:
+                if id is None:
+                    query = f"SELECT * FROM {table_name}"
+                    cursor.execute(query)
+                    items = cursor.fetchall()
+                else:
+                    query = f"SELECT * FROM {table_name} WHERE {id_column} = %s"
+                    cursor.execute(query, (id,))
+                    items = cursor.fetchone()
+
+                if items:
+                    print("Item Details:")
+                    if isinstance(items, dict):  # single item
+                        items = [items]
+                    for item in items:
+                        for key, value in item.items():
+                            print(f"{key}: {value}")
+                        print("-----")
+                else:
+                    print("Item not found")
+        except Exception as e:
+            print("Error occurred while viewing the item:", e)
+    else:
+        print("Invalid entity or id. Please try again.")
+
+# =============================================================================
+# def view_item2(connection, entity, id):
+#     table_name, id_column = table_mapping.get(entity)
+#     if table_name and id_column:
+#         try:
+#             with connection.cursor() as cursor:
+#                 query = f"SELECT * FROM {table_name} WHERE {id_column} = %s"
+#                 cursor.execute(query, (id,))
+#                 item = cursor.fetchone()
+# 
+#                 if item:
+#                     print("Item Details:")
+#                     for key, value in item.items():
+#                         print(f"{key}: {value}")
+#                 else:
+#                     print("Item not found")
+#         except Exception as e:
+#             print("Error occurred while viewing the item:", e)
+#     else:
+#         print("Invalid entity or id. Please try again.")
+# =============================================================================
+
+def delete_item(connection, entity, id):
+    table_name, id_column = table_mapping.get(entity)
+    if table_name and id_column:
+        try:
+            with connection.cursor() as cursor:
+                query = f"DELETE FROM {table_name} WHERE {id_column} = %s"
+                cursor.execute(query, (id,))
+                connection.commit()
+                print("Item deleted successfully")
+        except Exception as e:
+            print("Error occurred while deleting the item:", e)
+    else:
+        print("Invalid entity or id. Please try again.")
+
+# _______________________ GENERAL FUNCTIONS END _________________________#
 
 login()
