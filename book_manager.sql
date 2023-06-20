@@ -3,25 +3,27 @@ CREATE DATABASE IF NOT EXISTS BookManager;
 
 USE BookManager;
 
+-- need to add PK some of these have non
+-- Need to add deletion contraints depending on the entity 
+-- need to add ability to create users
+
 
 CREATE TABLE user
 (
 	username VARCHAR(30) PRIMARY KEY,
-    password VARCHAR(30),
+    password VARCHAR(30) NOT NULL,
     first_name VARCHAR(30) NOT NULL,
     last_name VARCHAR(30) NOT NULL,
     num_followers INT DEFAULT 0,
     num_following INT DEFAULT 0
-
 );
 
 CREATE TABLE librarian
 (
 	lib_username VARCHAR(30) PRIMARY KEY,
-    password VARCHAR(30),
+    password VARCHAR(30) NOT NULL,
     first_name VARCHAR(30) NOT NULL,
     last_name VARCHAR(30) NOT NULL
-
 );
 
 CREATE TABLE genre
@@ -29,14 +31,12 @@ CREATE TABLE genre
 	name VARCHAR(100) PRIMARY KEY,
     description VARCHAR(500) DEFAULT NULL,
 	num_books INT DEFAULT 0
-
 );
 
 CREATE TABLE author
 (
 	first_last_name VARCHAR(100) PRIMARY KEY,
 	num_books INT DEFAULT 0
-    
 );
 
 CREATE TABLE book
@@ -49,11 +49,10 @@ CREATE TABLE book
     book_genre VARCHAR(100) NOT NULL,
     librarian_username VARCHAR(30),
 
-	FOREIGN KEY (book_genre) REFERENCES genre (name),
-	FOREIGN KEY (author) REFERENCES author (first_last_name),
-    FOREIGN KEY (librarian_username) REFERENCES librarian (lib_username)
+	FOREIGN KEY (book_genre) REFERENCES genre (name) ON UPDATE CASCADE ON DELETE CASCADE,
+	FOREIGN KEY (author) REFERENCES author (first_last_name) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (librarian_username) REFERENCES librarian (lib_username) ON UPDATE CASCADE ON DELETE SET NULL
 );
-
 
 CREATE TABLE reviews
 (
@@ -63,21 +62,17 @@ CREATE TABLE reviews
     num_reviews INT DEFAULT 0
 );
 
-
 CREATE TABLE book_club
 (
-
     club_name VARCHAR(100) PRIMARY KEY,
     active TINYINT(1) DEFAULT 1,
     bookId INT,
     librarian VARCHAR(30),
     num_members INT DEFAULT 1,
 
-	FOREIGN KEY (bookId) REFERENCES book (bookId),
-    FOREIGN KEY (librarian) REFERENCES librarian (lib_username)
-    
+	FOREIGN KEY (bookId) REFERENCES book (bookId) ON UPDATE CASCADE ON DELETE SET NULL,
+    FOREIGN KEY (librarian) REFERENCES librarian (lib_username) ON UPDATE CASCADE ON DELETE SET NULL
 );
-
 
 CREATE TABLE book_user
 (
@@ -85,9 +80,8 @@ CREATE TABLE book_user
     username VARCHAR(30),
     status VARCHAR(30) NOT NULL,
     
-    FOREIGN KEY (bookId) REFERENCES book (bookId),
-    FOREIGN KEY (username) REFERENCES user (username)
-    
+    FOREIGN KEY (bookId) REFERENCES book (bookId) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (username) REFERENCES user (username) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE book_club_members
@@ -95,22 +89,18 @@ CREATE TABLE book_club_members
 	club_name VARCHAR(100),
     member VARCHAR(30),
     
-    FOREIGN KEY (club_name) REFERENCES book_club (club_name),
-    FOREIGN KEY (member) REFERENCES user (username)
-    
+    FOREIGN KEY (club_name) REFERENCES book_club (club_name) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (member) REFERENCES user (username) ON UPDATE CASCADE ON DELETE CASCADE
 );
-
 
 CREATE TABLE user_follows_user
 (
 	username VARCHAR(30),
     following_username VARCHAR(30),
     
-    FOREIGN KEY (username) REFERENCES user (username),
-    FOREIGN KEY (following_username) REFERENCES user (username)
-    
+    FOREIGN KEY (username) REFERENCES user (username) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (following_username) REFERENCES user (username) ON UPDATE CASCADE ON DELETE CASCADE
 );
-
 
 CREATE TABLE user_review_book
 (
@@ -118,10 +108,9 @@ CREATE TABLE user_review_book
     username VARCHAR(30),
     reviewId INT,
     
-    FOREIGN KEY (bookId) REFERENCES book (bookId),
-    FOREIGN KEY (username) REFERENCES user (username),
-    FOREIGN KEY (reviewId) REFERENCES reviews (reviewId)
-    
+    FOREIGN KEY (bookId) REFERENCES book (bookId) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (username) REFERENCES user (username) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (reviewId) REFERENCES reviews (reviewId) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 
