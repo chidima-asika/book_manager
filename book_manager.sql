@@ -136,7 +136,8 @@ CREATE TABLE user_review_book
 );
 
 
--- Triggers to update counter variables (num_following, num_books, num_members, etc.)
+---------------------------------- TRIGGERRS ----------------------------------
+-- update counter variables (num_following, num_books, num_members, etc.)
 
 
 DELIMITER //
@@ -230,7 +231,6 @@ BEGIN
     SET num_reviews = (SELECT COUNT(*) FROM user_review_book WHERE bookId = NEW.bookId)
     WHERE bookId = NEW.bookId;
     
-    
     UPDATE book
     SET ave_rating =
         (SELECT IFNULL(SUM(reviews.rating) / book.num_reviews, NULL)
@@ -253,7 +253,6 @@ BEGIN
     UPDATE book
     SET num_reviews = (SELECT COUNT(*) FROM user_review_book WHERE bookId = OLD.bookId)
     WHERE bookId = OLD.bookId;
-    
     
     UPDATE book
     SET ave_rating =
@@ -288,7 +287,7 @@ DROP TRIGGER IF EXISTS update_num_members_delete;
 CREATE TRIGGER update_num_members_delete AFTER DELETE ON book_club_members
 FOR EACH ROW
 BEGIN
-    
+
     UPDATE book_club
     SET num_members = (SELECT COUNT(*) FROM book_club_members WHERE club_name = OLD.club_name)
     WHERE club_name = OLD.club_name;
@@ -296,9 +295,19 @@ END //
 
 DELIMITER ;
 
+-------------------------------- TRIGGERRS END --------------------------------
 
 
--- Data dump
+
+------------------------------ STORED PROCEDURES ------------------------------ 
+
+
+
+---------------------------- STORED PROCEDURES END ----------------------------
+
+
+
+---------------------------------- DATA DUMP ----------------------------------
 
 INSERT INTO librarian (lib_username, password, first_name, last_name) VALUES
 ('test_librarian', 'tester123', 'Test', 'Librarian');
@@ -359,3 +368,4 @@ INSERT INTO user_review_book (bookId, username, reviewId) VALUES
 (4, 'jane_doe_22', 4),
 (1, 'jane_doe_22', 5);
 
+-------------------------------- DATA DUMP END --------------------------------
