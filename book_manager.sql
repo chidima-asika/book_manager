@@ -45,11 +45,13 @@ CREATE TABLE book
     title VARCHAR(100) NOT NULL,
     num_pages INT NOT NULL,
     publication_year YEAR NOT NULL,
+    num_reviews INT DEFAULT 0,
+    ave_rating DECIMAL(3, 2) DEFAULT NULL,
     
     author VARCHAR(100) NOT NULL,
     book_genre VARCHAR(100) NOT NULL,
     librarian_username VARCHAR(30),
-    num_reviews INT DEFAULT 0,
+    
 
 	FOREIGN KEY (book_genre) REFERENCES genre (name),
 	FOREIGN KEY (author) REFERENCES author (first_last_name),
@@ -234,6 +236,54 @@ END //
 DELIMITER ;
 
 
+DELIMITER //
+
+DROP TRIGGER IF EXISTS update_book_review_info_insert;
+CREATE TRIGGER update_book_review_info_insert AFTER INSERT ON user_review_book
+FOR EACH ROW
+BEGIN
+    
+    UPDATE book
+    SET num_reviews = (SELECT COUNT(*) FROM user_review_book WHERE bookId = NEW.bookId)
+    WHERE bookId = NEW.bookId;
+    
+    
+    UPDATE book
+    SET ave_rating =
+        (SELECT IFNULL(SUM(reviews.rating) / book.num_reviews, NULL)
+        FROM reviews
+        JOIN user_review_book ON reviews.reviewId = user_review_book.reviewId
+        WHERE user_review_book.bookId = NEW.bookId)
+    WHERE bookId = NEW.bookId;
+END //
+
+DELIMITER ;
+
+
+DELIMITER //
+
+DROP TRIGGER IF EXISTS update_book_review_info_delete;
+CREATE TRIGGER update_book_review_info_delete AFTER DELETE ON user_review_book
+FOR EACH ROW
+BEGIN
+    
+    UPDATE book
+    SET num_reviews = (SELECT COUNT(*) FROM user_review_book WHERE bookId = OLD.bookId)
+    WHERE bookId = OLD.bookId;
+    
+    
+    UPDATE book
+    SET ave_rating =
+        (SELECT IFNULL(SUM(reviews.rating) / book.num_reviews, NULL)
+        FROM reviews
+        JOIN user_review_book ON reviews.reviewId = user_review_book.reviewId
+        WHERE user_review_book.bookId = OLD.bookId)
+    WHERE bookId = OLD.bookId;
+END //
+
+DELIMITER ;
+
+
 
 
 -- Data dump
@@ -275,6 +325,7 @@ INSERT INTO book_club (club_name, bookId, librarian) VALUES
 
 INSERT INTO book_club_members (club_name, member) VALUES
 ('PotterHeads', 'test_user'),
+('Classics Lovers', 'test_user'),
 ('Classics Lovers', 'jane_doe_22');
 
 INSERT INTO book_user (bookId, username, status) VALUES
