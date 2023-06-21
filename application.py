@@ -25,7 +25,7 @@ table_mapping = {
     "review": ("reviews", "reviewId"),
     "book_club": ("book_club", "club_name"),
     # "book_club_members": ("book_club_members", "member"),
-    "author": ("authors", "first_last_name"),
+    "author": ("author", "first_last_name"),
     "genre": ("genre", "name")
 }
 
@@ -77,10 +77,9 @@ def librarian_menu(connection, username):
         elif choice == "2":
             librarian_book_clubs_menu(connection, username)
         elif choice == "3":
-            break
-            authors_menu(connection)
+            authors_menu(connection, username)
         elif choice == "4":
-            genres_menu(connection)
+            genres_menu(connection, username)
         elif choice == "5":
             print("Logged out")
             break
@@ -238,7 +237,7 @@ def view_book_club_members(connection, club_name):
 # _______________________ unique librarian_book_clubs_menu FUNCTIONS END _________________________#
 
 
-def authors_menu(connection):
+def authors_menu(connection, username):
     while True:
         print("Authors Menu:")
         print("1. View an Author")
@@ -298,7 +297,7 @@ def view_item(connection, entity, id=None):
                             print(f"{key}: {value}")
                         print("-----")
                 else:
-                    print("Item not found")
+                    print(f"{entity} not found")
         except Exception as e:
             print("Error occurred while viewing the item:", e)
     else:
@@ -361,7 +360,6 @@ def user_menu(connection, username):
         elif choice == "3":
             user_book_clubs_menu(connection, username)
         elif choice == "4":
-            break
             authors_menu(connection, username)
         elif choice == "5":
             genres_menu(connection, username)
@@ -393,13 +391,13 @@ def user_books_menu(connection, username):
             view_item(connection, "book", book_id)
         elif choice == "3":
             add_book(connection, username, book_id)
-            update_status(connection, username, book_id)
+            update_status(connection, username, book_id) # these can be one function b/c one error should stop function
         elif choice == "4":
-            view_item(connection, "book_user", username)
+            view_item(connection, "book_user", username) # this is wrong
         elif choice == "5":
-            update_status(connection, username, book_id)
+            update_status(connection, username, book_id) # need to validate that book exists (we should extrapoalte this)
         elif choice == "6":
-            delete_item(connection, "book_user", book_id)
+            delete_item(connection, "book_user", book_id) # primary key is two values, need delete_item_junction function
             delete_book_user(connection, username, book_id)
         elif choice == "7":
             break
@@ -409,11 +407,11 @@ def user_books_menu(connection, username):
 # _______________________ unique user_books_menu FUNCTIONS _________________________#
 
 
-def add_book(connection, book_id):
+def add_book(connection, username, book_id):
     try:
         with connection.cursor() as cursor:
             query = "INSERT INTO book_user (bookId, username) VALUES (%s, '%')"
-            cursor.execute(query, (book_id,))
+            cursor.execute(query, (book_id,username))
             connection.commit()
             print("Book added successfully")
 
@@ -537,7 +535,7 @@ def user_book_clubs_menu(connection, username):
         print("7. Go Back")
         choice = input("Enter your choice: ")
 
-        if choice not in ["1", "4"]:
+        if choice not in ["1", "4", "7"]:
             bc_name = input("Enter Book Club name: ")
 
         if choice == "1":
@@ -610,7 +608,7 @@ def leave_book_club(connection, username, bc_name):
                 connection.commit()
                 print(f"Left the book club {bc_name} successfully")
             else:
-                print(f"You are not a member of the {bc_name} book club")
+                print(f"You are not a member of the {bc_name} book club or book club does not exists")
 
     except Exception as e:
         print("Error occurred while leaving the book club:", e)
