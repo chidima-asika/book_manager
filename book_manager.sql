@@ -152,15 +152,11 @@ BEGIN
     SET genre_name = NEW.book_genre;
     
     IF author_name IS NOT NULL THEN
-        UPDATE author
-        SET num_books = num_books + 1
-        WHERE first_last_name = author_name;
+        UPDATE author SET num_books = num_books + 1 WHERE first_last_name = author_name;
     END IF;
     
     IF genre_name IS NOT NULL THEN
-        UPDATE genre
-        SET num_books = num_books + 1
-        WHERE name = genre_name;
+        UPDATE genre SET num_books = num_books + 1 WHERE name = genre_name;
     END IF;
 END //
 
@@ -180,15 +176,11 @@ BEGIN
     SET genre_name = OLD.book_genre;
     
     IF author_name IS NOT NULL THEN
-        UPDATE author
-        SET num_books = num_books - 1
-        WHERE first_last_name = author_name;
+        UPDATE author SET num_books = num_books - 1 WHERE first_last_name = author_name;
     END IF;
     
     IF genre_name IS NOT NULL THEN
-        UPDATE genre
-        SET num_books = num_books - 1
-        WHERE name = genre_name;
+        UPDATE genre SET num_books = num_books - 1 WHERE name = genre_name;
     END IF;
 END //
 
@@ -202,14 +194,10 @@ CREATE TRIGGER update_num_following_insert AFTER INSERT ON user_follows_user
 FOR EACH ROW
 BEGIN
     -- update num_following for the user who initiated the follow
-    UPDATE user
-    SET num_following = num_following + 1
-    WHERE username = NEW.username;
+    UPDATE user SET num_following = num_following + 1 WHERE username = NEW.username;
     
     -- update num_followers for the user who is being followed
-    UPDATE user
-    SET num_followers = num_followers + 1
-    WHERE username = NEW.following_username;
+    UPDATE user SET num_followers = num_followers + 1 WHERE username = NEW.following_username;
 END //
 
 DELIMITER ;
@@ -222,14 +210,10 @@ CREATE TRIGGER update_num_following_delete AFTER DELETE ON user_follows_user
 FOR EACH ROW
 BEGIN
     -- update num_following for the user who initiated the follow
-    UPDATE user
-    SET num_following = num_following - 1
-    WHERE username = OLD.username;
+    UPDATE user SET num_following = num_following - 1 WHERE username = OLD.username;
     
     -- update num_followers for the user who is being followed
-    UPDATE user
-    SET num_followers = num_followers - 1
-    WHERE username = OLD.following_username;
+    UPDATE user SET num_followers = num_followers - 1 WHERE username = OLD.following_username;
 END //
 
 DELIMITER ;
@@ -291,9 +275,7 @@ FOR EACH ROW
 BEGIN
     
     UPDATE book_club
-    SET num_members = (
-        SELECT COUNT(*) FROM book_club_members WHERE club_name = NEW.club_name
-    )
+    SET num_members = (SELECT COUNT(*) FROM book_club_members WHERE club_name = NEW.club_name)
     WHERE club_name = NEW.club_name;
 END //
 
@@ -308,9 +290,7 @@ FOR EACH ROW
 BEGIN
     
     UPDATE book_club
-    SET num_members = (
-        SELECT COUNT(*) FROM book_club_members WHERE club_name = OLD.club_name
-    )
+    SET num_members = (SELECT COUNT(*) FROM book_club_members WHERE club_name = OLD.club_name)
     WHERE club_name = OLD.club_name;
 END //
 
@@ -349,7 +329,8 @@ INSERT INTO reviews (rating, description) VALUES
 (5, NULL),
 (4, 'Great book'),
 (3, 'Not bad'),
-(2, 'Could be better');
+(2, 'Could be better'),
+(4, NULL);
 
 INSERT INTO book_club (club_name, bookId, librarian) VALUES
 ('PotterHeads', 4, 'test_librarian'),
@@ -375,4 +356,6 @@ INSERT INTO user_review_book (bookId, username, reviewId) VALUES
 (1, 'test_user', 1),
 (2, 'jane_doe_22', 2),
 (3, 'test_user', 3),
-(4, 'jane_doe_22', 4);
+(4, 'jane_doe_22', 4),
+(1, 'jane_doe_22', 5);
+
