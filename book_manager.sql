@@ -195,7 +195,6 @@ END //
 DELIMITER ;
 
 
-
 DELIMITER //
 
 DROP TRIGGER IF EXISTS update_num_following_insert;
@@ -284,6 +283,39 @@ END //
 DELIMITER ;
 
 
+DELIMITER //
+
+DROP TRIGGER IF EXISTS update_num_members_insert;
+CREATE TRIGGER update_num_members_insert AFTER INSERT ON book_club_members
+FOR EACH ROW
+BEGIN
+    
+    UPDATE book_club
+    SET num_members = (
+        SELECT COUNT(*) FROM book_club_members WHERE club_name = NEW.club_name
+    )
+    WHERE club_name = NEW.club_name;
+END //
+
+DELIMITER ;
+
+
+DELIMITER //
+
+DROP TRIGGER IF EXISTS update_num_members_delete;
+CREATE TRIGGER update_num_members_delete AFTER DELETE ON book_club_members
+FOR EACH ROW
+BEGIN
+    
+    UPDATE book_club
+    SET num_members = (
+        SELECT COUNT(*) FROM book_club_members WHERE club_name = OLD.club_name
+    )
+    WHERE club_name = OLD.club_name;
+END //
+
+DELIMITER ;
+
 
 
 -- Data dump
@@ -344,5 +376,3 @@ INSERT INTO user_review_book (bookId, username, reviewId) VALUES
 (2, 'jane_doe_22', 2),
 (3, 'test_user', 3),
 (4, 'jane_doe_22', 4);
-
-
