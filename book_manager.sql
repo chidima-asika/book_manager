@@ -187,6 +187,46 @@ END //
 DELIMITER ;
 
 
+DELIMITER //
+
+CREATE TRIGGER update_num_following_insert AFTER INSERT ON user_follows_user
+FOR EACH ROW
+BEGIN
+    -- Update num_following for the user who initiated the follow
+    UPDATE user
+    SET num_following = num_following + 1
+    WHERE username = NEW.username;
+    
+    -- Update num_followers for the user who is being followed
+    UPDATE user
+    SET num_followers = num_followers + 1
+    WHERE username = NEW.following_username;
+END //
+
+DELIMITER ;
+
+
+DELIMITER //
+
+CREATE TRIGGER update_num_following_delete AFTER DELETE ON user_follows_user
+FOR EACH ROW
+BEGIN
+    -- Update num_following for the user who initiated the follow
+    UPDATE user
+    SET num_following = num_following - 1
+    WHERE username = OLD.username;
+    
+    -- Update num_followers for the user who is being followed
+    UPDATE user
+    SET num_followers = num_followers - 1
+    WHERE username = OLD.following_username;
+END //
+
+DELIMITER ;
+
+
+
+
 -- Data dump
 
 INSERT INTO librarian (lib_username, password, first_name, last_name) VALUES
