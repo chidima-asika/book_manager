@@ -136,6 +136,7 @@ CREATE TABLE user_review_book
 
 -- Triggers to update counter variables (num_following, num_books, num_members, etc.)
 
+
 DELIMITER //
 
 DROP TRIGGER IF EXISTS update_num_books_insert;
@@ -150,16 +151,19 @@ BEGIN
     
     IF author_name IS NOT NULL THEN
         UPDATE author
-        SET num_books = (SELECT COUNT(*) FROM book WHERE author = author_name) WHERE first_last_name = author_name;
+        SET num_books = num_books + 1
+        WHERE first_last_name = author_name;
     END IF;
     
     IF genre_name IS NOT NULL THEN
         UPDATE genre
-        SET num_books = (SELECT COUNT(*) FROM book WHERE book_genre = genre_name) WHERE name = genre_name;
+        SET num_books = num_books + 1
+        WHERE name = genre_name;
     END IF;
 END //
 
 DELIMITER ;
+
 
 DELIMITER //
 
@@ -175,29 +179,33 @@ BEGIN
     
     IF author_name IS NOT NULL THEN
         UPDATE author
-        SET num_books = (SELECT COUNT(*) FROM book WHERE author = author_name) WHERE first_last_name = author_name;
+        SET num_books = num_books - 1
+        WHERE first_last_name = author_name;
     END IF;
     
     IF genre_name IS NOT NULL THEN
         UPDATE genre
-        SET num_books = (SELECT COUNT(*) FROM book WHERE book_genre = genre_name) WHERE name = genre_name;
+        SET num_books = num_books - 1
+        WHERE name = genre_name;
     END IF;
 END //
 
 DELIMITER ;
 
 
+
 DELIMITER //
 
+DROP TRIGGER IF EXISTS update_num_following_insert;
 CREATE TRIGGER update_num_following_insert AFTER INSERT ON user_follows_user
 FOR EACH ROW
 BEGIN
-    -- Update num_following for the user who initiated the follow
+    -- update num_following for the user who initiated the follow
     UPDATE user
     SET num_following = num_following + 1
     WHERE username = NEW.username;
     
-    -- Update num_followers for the user who is being followed
+    -- update num_followers for the user who is being followed
     UPDATE user
     SET num_followers = num_followers + 1
     WHERE username = NEW.following_username;
@@ -208,15 +216,16 @@ DELIMITER ;
 
 DELIMITER //
 
+DROP TRIGGER IF EXISTS update_num_following_delete;
 CREATE TRIGGER update_num_following_delete AFTER DELETE ON user_follows_user
 FOR EACH ROW
 BEGIN
-    -- Update num_following for the user who initiated the follow
+    -- update num_following for the user who initiated the follow
     UPDATE user
     SET num_following = num_following - 1
     WHERE username = OLD.username;
     
-    -- Update num_followers for the user who is being followed
+    -- update num_followers for the user who is being followed
     UPDATE user
     SET num_followers = num_followers - 1
     WHERE username = OLD.following_username;
