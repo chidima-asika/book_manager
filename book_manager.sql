@@ -83,7 +83,7 @@ CREATE TABLE book_user
 (
 	bookId INT,
     username VARCHAR(30),
-    status VARCHAR(30) NOT NULL,
+    status VARCHAR(30) DEFAULT NULL,
     
     FOREIGN KEY (bookId) REFERENCES book (bookId),
     FOREIGN KEY (username) REFERENCES user (username)
