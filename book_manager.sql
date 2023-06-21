@@ -87,7 +87,9 @@ CREATE TABLE book_user
     status VARCHAR(30) DEFAULT NULL,
     
     FOREIGN KEY (bookId) REFERENCES book (bookId),
-    FOREIGN KEY (username) REFERENCES user (username)
+    FOREIGN KEY (username) REFERENCES user (username),
+    
+    PRIMARY KEY (bookId, username)
     
 );
 
@@ -97,7 +99,9 @@ CREATE TABLE book_club_members
     member VARCHAR(30),
     
     FOREIGN KEY (club_name) REFERENCES book_club (club_name),
-    FOREIGN KEY (member) REFERENCES user (username)
+    FOREIGN KEY (member) REFERENCES user (username),
+    
+    PRIMARY KEY (club_name, member)
     
 );
 
@@ -108,7 +112,9 @@ CREATE TABLE user_follows_user
     following_username VARCHAR(30),
     
     FOREIGN KEY (username) REFERENCES user (username),
-    FOREIGN KEY (following_username) REFERENCES user (username)
+    FOREIGN KEY (following_username) REFERENCES user (username),
+    
+    PRIMARY KEY (username, following_username)
     
 );
 
@@ -121,7 +127,9 @@ CREATE TABLE user_review_book
     
     FOREIGN KEY (bookId) REFERENCES book (bookId),
     FOREIGN KEY (username) REFERENCES user (username),
-    FOREIGN KEY (reviewId) REFERENCES reviews (reviewId)
+    FOREIGN KEY (reviewId) REFERENCES reviews (reviewId),
+    
+    PRIMARY KEY (bookId, username, reviewId)
     
 );
 
