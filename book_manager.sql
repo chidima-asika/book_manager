@@ -28,26 +28,28 @@ CREATE TABLE genre
 (
 	name VARCHAR(100) PRIMARY KEY,
     description VARCHAR(500) DEFAULT NULL,
-	num_books INT DEFAULT 0
+	num_books INT DEFAULT 1
 
 );
 
 CREATE TABLE author
 (
 	first_last_name VARCHAR(100) PRIMARY KEY,
-	num_books INT DEFAULT 0
-    
+	num_books INT DEFAULT 1
+
 );
 
 CREATE TABLE book
 (
 	bookId INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(100) NOT NULL,
-    author VARCHAR(100) NOT NULL,
     num_pages INT NOT NULL,
     publication_year YEAR NOT NULL,
+    
+    author VARCHAR(100) NOT NULL,
     book_genre VARCHAR(100) NOT NULL,
     librarian_username VARCHAR(30),
+    num_reviews INT DEFAULT 0,
 
 	FOREIGN KEY (book_genre) REFERENCES genre (name),
 	FOREIGN KEY (author) REFERENCES author (first_last_name),
@@ -59,8 +61,7 @@ CREATE TABLE reviews
 (
 	reviewId INT AUTO_INCREMENT PRIMARY KEY,
     rating INT NOT NULL,
-    description VARCHAR(500) DEFAULT NULL,
-    num_reviews INT DEFAULT 0
+    description VARCHAR(500) DEFAULT NULL
 );
 
 
@@ -71,7 +72,7 @@ CREATE TABLE book_club
     active TINYINT(1) DEFAULT 1,
     bookId INT,
     librarian VARCHAR(30),
-    num_members INT DEFAULT 1,
+    num_members INT DEFAULT 0,
 
 	FOREIGN KEY (bookId) REFERENCES book (bookId),
     FOREIGN KEY (librarian) REFERENCES librarian (lib_username)
@@ -125,6 +126,59 @@ CREATE TABLE user_review_book
 );
 
 
+-- Triggers to update counter variables (num_following, num_books, num_members, etc.)
+
+DELIMITER //
+
+DROP TRIGGER IF EXISTS update_num_books_insert;
+CREATE TRIGGER update_num_books_insert AFTER INSERT ON book
+FOR EACH ROW
+BEGIN
+    DECLARE author_name VARCHAR(100);
+    DECLARE genre_name VARCHAR(100);
+    
+    SET author_name = NEW.author;
+    SET genre_name = NEW.book_genre;
+    
+    IF author_name IS NOT NULL THEN
+        UPDATE author
+        SET num_books = (SELECT COUNT(*) FROM book WHERE author = author_name) WHERE first_last_name = author_name;
+    END IF;
+    
+    IF genre_name IS NOT NULL THEN
+        UPDATE genre
+        SET num_books = (SELECT COUNT(*) FROM book WHERE book_genre = genre_name) WHERE name = genre_name;
+    END IF;
+END //
+
+DELIMITER ;
+
+DELIMITER //
+
+DROP TRIGGER IF EXISTS update_num_books_delete;
+CREATE TRIGGER update_num_books_delete AFTER DELETE ON book
+FOR EACH ROW
+BEGIN
+    DECLARE author_name VARCHAR(100);
+    DECLARE genre_name VARCHAR(100);
+    
+    SET author_name = OLD.author;
+    SET genre_name = OLD.book_genre;
+    
+    IF author_name IS NOT NULL THEN
+        UPDATE author
+        SET num_books = (SELECT COUNT(*) FROM book WHERE author = author_name) WHERE first_last_name = author_name;
+    END IF;
+    
+    IF genre_name IS NOT NULL THEN
+        UPDATE genre
+        SET num_books = (SELECT COUNT(*) FROM book WHERE book_genre = genre_name) WHERE name = genre_name;
+    END IF;
+END //
+
+DELIMITER ;
+
+
 # Data dump
 
 INSERT INTO librarian (lib_username, password, first_name, last_name) VALUES
@@ -164,4 +218,5 @@ INSERT INTO book_user (bookId, username, status) VALUES
 (2, 'test_user', 'Currently Reading'),
 (3, 'test_user', 'Want to Read'),
 (4, 'test_user', 'Want to Read');
+
 
