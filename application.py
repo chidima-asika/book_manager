@@ -154,7 +154,11 @@ def user_books_menu(connection, username):
         elif choice == "5":
             update_status(connection, username, book_id)
         elif choice == "6":
+<<<<<<< Updated upstream
             delete_item(connection, "book_user", book_id)
+=======
+            delete_book_user(connection, username, book_id)
+>>>>>>> Stashed changes
         elif choice == "7":
 >>>>>>> Stashed changes
             break
@@ -215,6 +219,16 @@ def update_status(connection, username, book_id):
     except Exception as e:
         print("Error occurred while updating book status:", e)
 
+
+def delete_book_user(connection, username, book_id):
+    try:
+        with connection.cursor() as cursor:
+            query = "DELETE FROM book_user WHERE username = %s AND bookId = %s"
+            cursor.execute(query, (username, book_id))
+            connection.commit()
+            print("Book removed from your books successfully")
+    except Exception as e:
+        print("Error occurred while deleting book:", e)
 
 
 # _______________________ unique user_books_menu FUNCTIONS END _________________________#
