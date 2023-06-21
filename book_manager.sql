@@ -43,10 +43,11 @@ CREATE TABLE book
 (
 	bookId INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(100) NOT NULL,
-    author VARCHAR(100) NOT NULL,
     num_pages INT NOT NULL,
     publication_year YEAR NOT NULL,
+    num_reviews INT DEFAULT 0,
     book_genre VARCHAR(100) NOT NULL,
+    author VARCHAR(100) NOT NULL,
     librarian_username VARCHAR(30),
 
 	FOREIGN KEY (book_genre) REFERENCES genre (name) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -58,8 +59,8 @@ CREATE TABLE reviews
 (
 	reviewId INT AUTO_INCREMENT PRIMARY KEY,
     rating INT NOT NULL,
-    description VARCHAR(500) DEFAULT NULL,
-    num_reviews INT DEFAULT 0
+    description VARCHAR(500) DEFAULT NULL
+    
 );
 
 CREATE TABLE book_club
