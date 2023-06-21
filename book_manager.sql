@@ -187,7 +187,7 @@ END //
 DELIMITER ;
 
 
-# Data dump
+-- Data dump
 
 INSERT INTO librarian (lib_username, password, first_name, last_name) VALUES
 ('test_librarian', 'tester123', 'Test', 'Librarian');
@@ -202,14 +202,23 @@ INSERT INTO author (first_last_name) VALUES
 ('George Orwell'),
 ('J.K. Rowling');
 
-INSERT INTO genre (name) VALUES
-('Historical Fiction'), ('Science Fiction'), ('Fantasy');
+INSERT INTO genre (name, description) VALUES
+('Historical Fiction', 'Historical fiction is a literary genre in which the plot takes place in a setting located in the past'),
+('Science Fiction', 'Science fiction is a genre of speculative fiction that typically deals with imaginative and futuristic concepts'),
+('Fantasy', 'Fantasy is a genre of speculative fiction set in a fictional universe, often inspired by myth and folklore');
 
-INSERT INTO book (title, num_pages, publication_year, book_genre, author, librarian_username) VALUES 
-('The Great Gatsby', 180, 1925, 'Historical Fiction', 'F. Scott Fitzgerald', 'test_librarian'),
-('To Kill a Mocking Bird', 323, 1960, 'Historical Fiction', 'Harper Lee', 'test_librarian'),
-('1984', 368, 1949, 'Science Fiction', 'George Orwell', 'test_librarian'),
-('Harry Potter and the Deathly Hallows', 759, 2007, 'Fantasy', 'J.K. Rowling', 'test_librarian');
+
+INSERT INTO book (title, num_pages, publication_year, author, book_genre, librarian_username) VALUES 
+('The Great Gatsby', 180, 1925, 'F. Scott Fitzgerald', 'Historical Fiction', 'test_librarian'),
+('To Kill a Mocking Bird', 323, 1960, 'Harper Lee', 'Historical Fiction', 'test_librarian'),
+('1984', 368, 1949, 'George Orwell', 'Science Fiction', 'test_librarian'),
+('Harry Potter and the Deathly Hallows', 759, 2007, 'J.K. Rowling', 'Fantasy', 'test_librarian');
+
+INSERT INTO reviews (rating, description) VALUES
+(5, NULL),
+(4, 'Great book'),
+(3, 'Not bad'),
+(2, 'Could be better');
 
 INSERT INTO book_club (club_name, bookId, librarian) VALUES
 ('PotterHeads', 4, 'test_librarian'),
@@ -226,5 +235,14 @@ INSERT INTO book_user (bookId, username, status) VALUES
 (2, 'test_user', 'Currently Reading'),
 (3, 'test_user', 'Want to Read'),
 (4, 'test_user', 'Want to Read');
+
+INSERT INTO user_follows_user (username, following_username) VALUES
+('test_user', 'jane_doe_22');
+
+INSERT INTO user_review_book (bookId, username, reviewId) VALUES
+(1, 'test_user', 1),
+(2, 'jane_doe_22', 2),
+(3, 'test_user', 3),
+(4, 'jane_doe_22', 4);
 
 
