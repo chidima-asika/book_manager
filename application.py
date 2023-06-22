@@ -556,8 +556,7 @@ def delete_item(connection, entity, id):
     if table_name and id_column:
         try:
             with connection.cursor() as cursor:
-                query = f"DELETE FROM {table_name} WHERE {id_column} = %s"
-                cursor.execute(query, (id,))
+                cursor.callproc('delete_item_proc', (entity, id, id_column))
                 connection.commit()
                 print("Item deleted successfully")
         except Exception as e:

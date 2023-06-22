@@ -7,6 +7,7 @@ USE BookManager;
 -- Need to add deletion contraints depending on the entity 
 -- need to add ability to create users
 
+
 DROP TABLE IF EXISTS user;
 DROP TABLE IF EXISTS librarian;
 DROP TABLE IF EXISTS genre;
@@ -304,6 +305,9 @@ CREATE TABLE user_review_book
 
 -- ---------------------------- STORED PROCEDURES END ----------------------------
 
+-- librarian_books_menu
+-- -- librarian_books_menu END
+
 DELIMITER //
 CREATE PROCEDURE view_item_proc(IN entity VARCHAR(100), IN item_id VARCHAR(100), IN id_column VARCHAR(100))
 BEGIN
@@ -317,6 +321,17 @@ BEGIN
 END //
 DELIMITER ;
 
+DELIMITER //
+
+CREATE PROCEDURE delete_item_proc(IN entity VARCHAR(100), IN item_id VARCHAR(100), IN id_column VARCHAR(100))
+BEGIN
+    SET @query = CONCAT('DELETE FROM ', entity, ' WHERE ', id_column, ' = ', item_id);
+    PREPARE stmt FROM @query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+END //
+
+DELIMITER ;
 
 
 DELIMITER //
@@ -396,4 +411,5 @@ INSERT INTO user_review_book (bookId, username, reviewId) VALUES
 (1, 'jane_doe_22', 5);
 
 -------------------------------- DATA DUMP END --------------------------------
+
 
