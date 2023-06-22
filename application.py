@@ -801,6 +801,20 @@ def validate_instance_exists(connection, table_name, column_name, value):
         print("Error occurred while validating instance:", e)
         return False
 
+def delete_item_junction(connection, table_name, key1_name, key1_value, key2_name, key2_value, key3_name=None, key3_value=None):
+    try:
+        with connection.cursor() as cursor:
+            cursor.callproc('delete_item_junction', (table_name, key1_name, key1_value, key2_name, key2_value, key3_name, key3_value))
+            result = cursor.fetchone()
+            if result:
+                print(result["message"])
+            else:
+                print("Deletion failed")
+
+    except Exception as e:
+        print("Error occurred while deleting the item:", e)
+
+
 
 # _______________________ GENERAL FUNCTIONS END _________________________#
 

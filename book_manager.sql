@@ -590,8 +590,38 @@ BEGIN
     EXECUTE stmt;
     DEALLOCATE PREPARE stmt;
 END //
-
 DELIMITER ;
+
+
+DELIMITER //
+
+CREATE PROCEDURE delete_item_junction(
+    IN p_table_name VARCHAR(100),
+    IN p_key1_name VARCHAR(100),
+    IN p_key1_value VARCHAR(100),
+    IN p_key2_name VARCHAR(100),
+    IN p_key2_value VARCHAR(100),
+    IN p_key3_name VARCHAR(100) DEFAULT NULL,
+    IN p_key3_value VARCHAR(100) DEFAULT NULL
+)
+BEGIN
+    SET @query = CONCAT('DELETE FROM ', p_table_name, ' WHERE ', p_key1_name, ' = ? AND ', p_key2_name, ' = ?');
+    
+    IF p_key3_name IS NOT NULL THEN
+        SET @query = CONCAT(@query, ' AND ', p_key3_name, ' = ?');
+        PREPARE stmt FROM @query;
+        EXECUTE stmt USING p_key1_value, p_key2_value, p_key3_value;
+        DEALLOCATE PREPARE stmt;
+    ELSE
+        PREPARE stmt FROM @query;
+        EXECUTE stmt USING p_key1_value, p_key2_value;
+        DEALLOCATE PREPARE stmt;
+    END IF;
+    
+    SELECT 'Row deleted successfully' AS message;
+END //
+DELIMITER ;
+
 
 -- general procedures END
 
