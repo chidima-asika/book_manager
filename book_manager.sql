@@ -51,7 +51,6 @@ CREATE TABLE book
     ave_rating DECIMAL(3, 2) DEFAULT NULL,
     author VARCHAR(100) NOT NULL,
     book_genre VARCHAR(100) NOT NULL,
-    author VARCHAR(100) NOT NULL,
     librarian_username VARCHAR(30),
     
 
@@ -86,7 +85,7 @@ CREATE TABLE book_user
     username VARCHAR(30),
     status VARCHAR(30) DEFAULT NULL,
     
-    PRIMARY KEY (bookId, username)
+    PRIMARY KEY (bookId, username),
     
     FOREIGN KEY (bookId) REFERENCES book (bookId) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (username) REFERENCES user (username) ON UPDATE CASCADE ON DELETE CASCADE
@@ -102,16 +101,15 @@ CREATE TABLE book_club_members
     FOREIGN KEY (member) REFERENCES user (username) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TABLE user_follows_user
-(
-	username VARCHAR(30),
-    following_username VARCHAR(30)
+CREATE TABLE user_follows_user (
+    username VARCHAR(30),
+    following_username VARCHAR(30),
     
-    PRIMARY KEY (username, following_username)
-    
+    PRIMARY KEY (username, following_username),
     FOREIGN KEY (username) REFERENCES user (username) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (following_username) REFERENCES user (username) ON UPDATE CASCADE ON DELETE CASCADE
 );
+
 
 CREATE TABLE user_review_book
 (
@@ -285,19 +283,19 @@ END //
 
 DELIMITER ;
 
--------------------------------- TRIGGERRS END --------------------------------
+-- ------------------------------TRIGGERRS END --------------------------------
 
 
 
------------------------------- STORED PROCEDURES ------------------------------ 
+-- ------------------------------ STORED PROCEDURES ------------------------------ 
 
 
 
----------------------------- STORED PROCEDURES END ----------------------------
+-- ---------------------------- STORED PROCEDURES END ----------------------------
 
 
 
----------------------------------- DATA DUMP ----------------------------------
+-- ---------------------------------- DATA DUMP ----------------------------------
 
 INSERT INTO librarian (lib_username, password, first_name, last_name) VALUES
 ('test_librarian', 'tester123', 'Test', 'Librarian');
@@ -360,3 +358,4 @@ INSERT INTO user_review_book (bookId, username, reviewId) VALUES
 (1, 'jane_doe_22', 5);
 
 -------------------------------- DATA DUMP END --------------------------------
+

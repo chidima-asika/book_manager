@@ -119,39 +119,23 @@ def create_book(connection, username):
         with connection.cursor() as cursor:
             title = input("Enter the title: ")
             author = input("Enter the author's full name: ")
-            
-            # Check if the author exists
-            query = "SELECT * FROM author WHERE first_last_name = %s"
-            cursor.execute(query, (author,))
-            result = cursor.fetchone()
-            
-            if not result:
+
+            if not validate_instance_exists(connection, 'author', 'first_last_name', author):
                 print("Author not found in the database. Please create the author before creating a book.")
                 return
-            
+
             book_genre = input("Enter the genre name: ")
-            
-            # Check if the genre exists
-            query = "SELECT * FROM genre WHERE name = %s"
-            cursor.execute(query, (book_genre,))
-            result = cursor.fetchone()
-            
-            if not result:
+
+            if not validate_instance_exists(connection, 'genre', 'name', book_genre):
                 print("Genre not found in the database. Please create the genre before creating a book.")
                 return
-            
+
             num_pages = int(input("Enter the number of pages: "))
             publication_year = int(input("Enter the publication year: "))
-            
-            
+
             librarian_username = username
 
-            # Check if the book already exists
-            query = "SELECT * FROM book WHERE title = %s AND author = %s"
-            cursor.execute(query, (title, author))
-            result = cursor.fetchone()
-
-            if result:
+            if validate_instance_exists(connection, 'book', 'title', title):
                 print("The book already exists in the database.")
                 return
 
@@ -160,9 +144,10 @@ def create_book(connection, username):
             cursor.execute(query, (title, author, num_pages, publication_year, book_genre, librarian_username))
             connection.commit()
             print("Book created successfully")
-            
+
     except Exception as e:
         print("Error occurred while creating the book:", e)
+
 
 # _______________________ unique librarian_books_menu FUNCTIONS END _________________________#
 
@@ -202,20 +187,21 @@ def create_book_club(connection, librarian_username):
 
     try:
         with connection.cursor() as cursor:
-            # Check if the book club already exists
-            query = "SELECT club_name FROM book_club WHERE club_name = %s"
-            cursor.execute(query, (club_name,))
-            existing_club = cursor.fetchone()
 
-            if existing_club:
+            if validate_instance_exists(connection, 'book_club', 'club_name', club_name):
                 print("Book Club already exists")
             else:
+                if not validate_instance_exists(connection, 'book', 'bookId', book_id):
+                    print("Book does not exist")
+                    return
+
                 query = "INSERT INTO book_club (club_name, bookId, librarian) VALUES (%s, %s, %s)"
                 cursor.execute(query, (club_name, book_id, librarian_username))
                 connection.commit()
                 print("Book Club created successfully")
     except Exception as e:
         print("Error occurred while creating the Book Club:", e)
+
 
 def view_book_club_members(connection, club_name):
     try:
@@ -298,27 +284,6 @@ def view_item(connection, entity, id=None):
                         print("-----")
                 else:
                     print(f"{entity} not found")
-        except Exception as e:
-            print("Error occurred while viewing the item:", e)
-    else:
-        print("Invalid entity. Please try again.")
-
-
-def view_item2(connection, entity, id):
-    table_name, id_column = table_mapping.get(entity)
-    if table_name and id_column:
-        try:
-            with connection.cursor() as cursor:
-                query = f"SELECT * FROM {table_name} WHERE {id_column} = %s"
-                cursor.execute(query, (id,))
-                item = cursor.fetchone()
-
-                if item:
-                    print("Item Details:")
-                    for key, value in item.items():
-                        print(f"{key}: {value}")
-                else:
-                    print("Item not found")
         except Exception as e:
             print("Error occurred while viewing the item:", e)
     else:
@@ -578,7 +543,6 @@ def view_book_club_personal(connection, username):
 def join_book_club(connection, username, bc_name):
     try:
         with connection.cursor() as cursor:
-            # Check if the user is already a member of the book club
             query = "SELECT club_name FROM book_club_members WHERE club_name = %s AND member = %s"
             cursor.execute(query, (bc_name, username))
             result = cursor.fetchone()
@@ -586,7 +550,6 @@ def join_book_club(connection, username, bc_name):
             if result:
                 print("You are already a member of this book club")
             else:
-                # Add the user as a member of the book club
                 query = "INSERT INTO book_club_members (club_name, member) VALUES (%s, %s)"
                 cursor.execute(query, (bc_name, username))
                 connection.commit()
@@ -677,28 +640,6 @@ def view_item(connection, entity, id=None):
     else:
         print("Invalid entity or id. Please try again.")
 
-# =============================================================================
-# def view_item2(connection, entity, id):
-#     table_name, id_column = table_mapping.get(entity)
-#     if table_name and id_column:
-#         try:
-#             with connection.cursor() as cursor:
-#                 query = f"SELECT * FROM {table_name} WHERE {id_column} = %s"
-#                 cursor.execute(query, (id,))
-#                 item = cursor.fetchone()
-# 
-#                 if item:
-#                     print("Item Details:")
-#                     for key, value in item.items():
-#                         print(f"{key}: {value}")
-#                 else:
-#                     print("Item not found")
-#         except Exception as e:
-#             print("Error occurred while viewing the item:", e)
-#     else:
-#         print("Invalid entity or id. Please try again.")
-# =============================================================================
-
 def delete_item(connection, entity, id):
     table_name, id_column = table_mapping.get(entity)
     if table_name and id_column:
@@ -712,6 +653,18 @@ def delete_item(connection, entity, id):
             print("Error occurred while deleting the item:", e)
     else:
         print("Invalid entity or id. Please try again.")
+
+def validate_instance_exists(connection, table_name, column_name, value):
+    try:
+        with connection.cursor() as cursor:
+            query = f"SELECT * FROM {table_name} WHERE {column_name} = %s"
+            cursor.execute(query, (value,))
+            result = cursor.fetchone()
+            return result is not None
+    except Exception as e:
+        print("Error occurred while validating instance:", e)
+        return False
+
 
 # _______________________ GENERAL FUNCTIONS END _________________________#
 
