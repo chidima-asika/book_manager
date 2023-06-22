@@ -336,18 +336,6 @@ DELIMITER ;
 -- librarian_bookclub_menu END
 
 -- endn_bookclub_menu
-DELIMITER //
-
-CREATE PROCEDURE view_book_club_personal_proc(IN username VARCHAR(30))
-BEGIN
-
-    SELECT club_name 
-    FROM book_club_members
-    WHERE member = username;
-
-END //
-
-DELIMITER ;
 
 DELIMITER //
 

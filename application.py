@@ -413,7 +413,8 @@ def user_book_clubs_menu(connection, username):
         elif choice == "3":
             view_column_items(connection, "member", "book_club_members", "club_name", bc_name)
         elif choice == "4":
-            view_book_club_personal(connection, username) 
+            # view_book_club_personal(connection, username) 
+            view_column_items(connection, "club_name", "book_club_members", "member", username)
         elif choice == "5":
             join_book_club(connection, username, bc_name)
         elif choice == "6":
@@ -424,25 +425,6 @@ def user_book_clubs_menu(connection, username):
             print("Invalid choice. Please try again.")
 
 # _______________________ unique user_book_clubs_menu FUNCTIONS _________________________#
-
-def view_book_club_personal(connection, username):
-    try:
-        with connection.cursor() as cursor:
-            # Call the stored procedure
-            cursor.callproc('view_book_club_personal_proc', (username,))
-
-            result = cursor.fetchall()
-
-            if result:
-                print(f"Book Clubs {username} is a member of:")
-                for row in result:
-                    print(row['club_name'])
-            else:
-                print("No book clubs found for your username")
-
-    except Exception as e:
-        print("Error occurred while fetching book clubs:", e)
-
 
 
 def join_book_club(connection, username, bc_name):
