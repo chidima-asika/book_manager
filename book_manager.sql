@@ -356,6 +356,32 @@ END //
 
 DELIMITER ;
 
+DELIMITER //
+
+CREATE PROCEDURE leave_book_club_proc(IN username VARCHAR(30), IN bc_name VARCHAR(100))
+BEGIN
+    DECLARE is_member INT;
+
+    -- Check if the user is a member of the book club
+    SELECT COUNT(*) INTO is_member
+    FROM book_club_members
+    WHERE club_name = bc_name AND member = username;
+
+    IF is_member > 0 THEN
+        -- Remove the user from the book club
+        DELETE FROM book_club_members
+        WHERE club_name = bc_name AND member = username;
+        
+        SELECT CONCAT('Left the book club ', bc_name, ' successfully') AS 'message';
+    ELSE
+        SELECT CONCAT('You are not a member of the ', bc_name, ' book club or book club does not exist') AS 'message';
+    END IF;
+    
+END //
+
+DELIMITER ;
+
+
 -- end_bookclub_menu END
 
 DELIMITER //

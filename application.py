@@ -480,20 +480,19 @@ def join_book_club(connection, username, bc_name):
 def leave_book_club(connection, username, bc_name):
     try:
         with connection.cursor() as cursor:
-            query = "SELECT club_name FROM book_club_members WHERE club_name = %s AND member = %s"
-            cursor.execute(query, (bc_name, username))
+            # Call the stored procedure
+            cursor.callproc('leave_book_club_proc', (username, bc_name))
+
+            # Fetch the result message
             result = cursor.fetchone()
 
             if result:
-                query = "DELETE FROM book_club_members WHERE club_name = %s AND member = %s"
-                cursor.execute(query, (bc_name, username))
-                connection.commit()
-                print(f"Left the book club {bc_name} successfully")
+                print(result['message'])
             else:
-                print(f"You are not a member of the {bc_name} book club or book club does not exists")
-
+                print("Error occurred while leaving the book club")
     except Exception as e:
         print("Error occurred while leaving the book club:", e)
+
 
 # _______________________ unique user_book_clubs_menu FUNCTIONS END _________________________#
 
