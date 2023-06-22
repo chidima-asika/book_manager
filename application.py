@@ -559,7 +559,7 @@ def user_reviews_menu(connection, username):
             view_item(connection, "rewiews", review_id)
         elif choice == "4":
             delete_item_junction(connection, "user_review_book", "bookId", book_id, 
-                                 "username", usernam, "reviewId", review_id)
+                                 "username", username, "reviewId", review_id)
         elif choice == "5":
             break
         else:
