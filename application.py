@@ -714,3 +714,5 @@ def validate_instance_exists(connection, table_name, column_name, value):
 # _______________________ GENERAL FUNCTIONS END _________________________#
 
 login()
+
+# this is a comment
