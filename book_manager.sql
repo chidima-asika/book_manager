@@ -7,6 +7,17 @@ USE BookManager;
 -- Need to add deletion contraints depending on the entity 
 -- need to add ability to create users
 
+DROP TABLE IF EXISTS user;
+DROP TABLE IF EXISTS librarian;
+DROP TABLE IF EXISTS genre;
+DROP TABLE IF EXISTS author;
+DROP TABLE IF EXISTS book;
+DROP TABLE IF EXISTS reviews;
+DROP TABLE IF EXISTS book_club;
+DROP TABLE IF EXISTS book_user;
+DROP TABLE IF EXISTS book_club_members;
+DROP TABLE IF EXISTS user_follows_user;
+DROP TABLE IF EXISTS user_review_book;
 
 CREATE TABLE user
 (
@@ -292,6 +303,33 @@ CREATE TABLE user_review_book
 
 
 -- ---------------------------- STORED PROCEDURES END ----------------------------
+
+DELIMITER //
+CREATE PROCEDURE view_item_proc(IN entity VARCHAR(100), IN item_id VARCHAR(100), IN id_column VARCHAR(100))
+BEGIN
+    SET @query = CONCAT('SELECT * FROM ', entity);
+    IF item_id IS NOT NULL THEN
+        SET @query = CONCAT(@query, ' WHERE ', id_column, ' = ', item_id);
+    END IF;
+    PREPARE stmt FROM @query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+END //
+DELIMITER ;
+
+
+
+DELIMITER //
+
+CREATE PROCEDURE delete_junction_instance(IN table_name VARCHAR(100), IN primary_key_columns VARCHAR(500), IN primary_key_values VARCHAR(500))
+BEGIN
+    SET @query = CONCAT('DELETE FROM ', table_name, ' WHERE ', primary_key_columns, ' = ', primary_key_values);
+    PREPARE stmt FROM @query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+END //
+
+DELIMITER ;
 
 
 

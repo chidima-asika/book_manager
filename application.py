@@ -529,32 +529,26 @@ def leave_book_club(connection, username, bc_name):
 
 # _______________________ GENERAL FUNCTIONS _________________________#
 
-def view_item(connection, entity, id=None):
+
+def view_item(connection, entity, item_id=None):
     table_name, id_column = table_mapping.get(entity)
     if table_name and id_column:
         try:
             with connection.cursor() as cursor:
-                if id is None:
-                    query = f"SELECT * FROM {table_name}"
-                    cursor.execute(query)
-                    items = cursor.fetchall()
-                else:
-                    query = f"SELECT * FROM {table_name} WHERE {id_column} = %s"
-                    cursor.execute(query, (id,))
-                    items = cursor.fetchall()
+                cursor.callproc('view_item_proc', (entity, item_id, id_column))
+                results = cursor.fetchall()
 
-                if items:
-                    print("Item Details:")
-                    for item in items:
-                        for key, value in item.items():
-                            print(f"{key}: {value}")
-                        print("-----")
-                else:
-                    print(f"{entity} not found")
+            if results:
+                print("Item Details:")
+                for item in results:
+                    for key, value in item.items():
+                        print(f"{key}: {value}")
+                    print("-----")
+            else:
+                print(f"{entity} not found")
         except Exception as e:
             print("Error occurred while viewing the item:", e)
-    else:
-        print("Invalid entity. Please try again.")
+
 
 
 def delete_item(connection, entity, id):
