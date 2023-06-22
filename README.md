@@ -65,6 +65,6 @@ Before running the project, you need to configure the database connection:
 
 Enjoy reading your books in organized peace!
 
-![Image Description](relative/path/to/image.jpg)
+![Image Description](images/cute-little-girl-book-lover-enjoys-reading-big-books-and-novels-cartoon-style-bibliophile-illustration-for-graphic-novels-2G61A8A.jpg)
 
 
