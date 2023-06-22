@@ -128,158 +128,158 @@ CREATE TABLE user_review_book
 -- update counter variables (num_following, num_books, num_members, etc.)
 
 
-DELIMITER //
+-- DELIMITER //
 
-DROP TRIGGER IF EXISTS update_num_books_insert;
-CREATE TRIGGER update_num_books_insert AFTER INSERT ON book
-FOR EACH ROW
-BEGIN
-    DECLARE author_name VARCHAR(100);
-    DECLARE genre_name VARCHAR(100);
+-- DROP TRIGGER IF EXISTS update_num_books_insert;
+-- CREATE TRIGGER update_num_books_insert AFTER INSERT ON book
+-- FOR EACH ROW
+-- BEGIN
+--     DECLARE author_name VARCHAR(100);
+--     DECLARE genre_name VARCHAR(100);
     
-    SET author_name = NEW.author;
-    SET genre_name = NEW.book_genre;
+--     SET author_name = NEW.author;
+--     SET genre_name = NEW.book_genre;
     
-    IF author_name IS NOT NULL THEN
-        UPDATE author SET num_books = num_books + 1 WHERE first_last_name = author_name;
-    END IF;
+--     IF author_name IS NOT NULL THEN
+--         UPDATE author SET num_books = num_books + 1 WHERE first_last_name = author_name;
+--     END IF;
     
-    IF genre_name IS NOT NULL THEN
-        UPDATE genre SET num_books = num_books + 1 WHERE name = genre_name;
-    END IF;
-END //
+--     IF genre_name IS NOT NULL THEN
+--         UPDATE genre SET num_books = num_books + 1 WHERE name = genre_name;
+--     END IF;
+-- END //
 
-DELIMITER ;
+-- DELIMITER ;
 
 
-DELIMITER //
+-- DELIMITER //
 
-DROP TRIGGER IF EXISTS update_num_books_delete;
-CREATE TRIGGER update_num_books_delete AFTER DELETE ON book
-FOR EACH ROW
-BEGIN
-    DECLARE author_name VARCHAR(100);
-    DECLARE genre_name VARCHAR(100);
+-- DROP TRIGGER IF EXISTS update_num_books_delete;
+-- CREATE TRIGGER update_num_books_delete AFTER DELETE ON book
+-- FOR EACH ROW
+-- BEGIN
+--     DECLARE author_name VARCHAR(100);
+--     DECLARE genre_name VARCHAR(100);
     
-    SET author_name = OLD.author;
-    SET genre_name = OLD.book_genre;
+--     SET author_name = OLD.author;
+--     SET genre_name = OLD.book_genre;
     
-    IF author_name IS NOT NULL THEN
-        UPDATE author SET num_books = num_books - 1 WHERE first_last_name = author_name;
-    END IF;
+--     IF author_name IS NOT NULL THEN
+--         UPDATE author SET num_books = num_books - 1 WHERE first_last_name = author_name;
+--     END IF;
     
-    IF genre_name IS NOT NULL THEN
-        UPDATE genre SET num_books = num_books - 1 WHERE name = genre_name;
-    END IF;
-END //
+--     IF genre_name IS NOT NULL THEN
+--         UPDATE genre SET num_books = num_books - 1 WHERE name = genre_name;
+--     END IF;
+-- END //
 
-DELIMITER ;
+-- DELIMITER ;
 
 
-DELIMITER //
+-- DELIMITER //
 
-DROP TRIGGER IF EXISTS update_num_following_insert;
-CREATE TRIGGER update_num_following_insert AFTER INSERT ON user_follows_user
-FOR EACH ROW
-BEGIN
-    -- update num_following for the user who initiated the follow
-    UPDATE user SET num_following = num_following + 1 WHERE username = NEW.username;
+-- DROP TRIGGER IF EXISTS update_num_following_insert;
+-- CREATE TRIGGER update_num_following_insert AFTER INSERT ON user_follows_user
+-- FOR EACH ROW
+-- BEGIN
+--     -- update num_following for the user who initiated the follow
+--     UPDATE user SET num_following = num_following + 1 WHERE username = NEW.username;
     
-    -- update num_followers for the user who is being followed
-    UPDATE user SET num_followers = num_followers + 1 WHERE username = NEW.following_username;
-END //
+--     -- update num_followers for the user who is being followed
+--     UPDATE user SET num_followers = num_followers + 1 WHERE username = NEW.following_username;
+-- END //
 
-DELIMITER ;
+-- DELIMITER ;
 
 
-DELIMITER //
+-- DELIMITER //
 
-DROP TRIGGER IF EXISTS update_num_following_delete;
-CREATE TRIGGER update_num_following_delete AFTER DELETE ON user_follows_user
-FOR EACH ROW
-BEGIN
-    -- update num_following for the user who initiated the follow
-    UPDATE user SET num_following = num_following - 1 WHERE username = OLD.username;
+-- DROP TRIGGER IF EXISTS update_num_following_delete;
+-- CREATE TRIGGER update_num_following_delete AFTER DELETE ON user_follows_user
+-- FOR EACH ROW
+-- BEGIN
+--     -- update num_following for the user who initiated the follow
+--     UPDATE user SET num_following = num_following - 1 WHERE username = OLD.username;
     
-    -- update num_followers for the user who is being followed
-    UPDATE user SET num_followers = num_followers - 1 WHERE username = OLD.following_username;
-END //
+--     -- update num_followers for the user who is being followed
+--     UPDATE user SET num_followers = num_followers - 1 WHERE username = OLD.following_username;
+-- END //
 
-DELIMITER ;
+-- DELIMITER ;
 
 
-DELIMITER //
+-- DELIMITER //
 
-DROP TRIGGER IF EXISTS update_book_review_info_insert;
-CREATE TRIGGER update_book_review_info_insert AFTER INSERT ON user_review_book
-FOR EACH ROW
-BEGIN
+-- DROP TRIGGER IF EXISTS update_book_review_info_insert;
+-- CREATE TRIGGER update_book_review_info_insert AFTER INSERT ON user_review_book
+-- FOR EACH ROW
+-- BEGIN
     
-    UPDATE book
-    SET num_reviews = (SELECT COUNT(*) FROM user_review_book WHERE bookId = NEW.bookId)
-    WHERE bookId = NEW.bookId;
+--     UPDATE book
+--     SET num_reviews = (SELECT COUNT(*) FROM user_review_book WHERE bookId = NEW.bookId)
+--     WHERE bookId = NEW.bookId;
     
-    UPDATE book
-    SET ave_rating =
-        (SELECT IFNULL(SUM(reviews.rating) / book.num_reviews, NULL)
-        FROM reviews
-        JOIN user_review_book ON reviews.reviewId = user_review_book.reviewId
-        WHERE user_review_book.bookId = NEW.bookId)
-    WHERE bookId = NEW.bookId;
-END //
+--     UPDATE book
+--     SET ave_rating =
+--         (SELECT IFNULL(SUM(reviews.rating) / book.num_reviews, NULL)
+--         FROM reviews
+--         JOIN user_review_book ON reviews.reviewId = user_review_book.reviewId
+--         WHERE user_review_book.bookId = NEW.bookId)
+--     WHERE bookId = NEW.bookId;
+-- END //
 
-DELIMITER ;
+-- DELIMITER ;
 
 
-DELIMITER //
+-- DELIMITER //
 
-DROP TRIGGER IF EXISTS update_book_review_info_delete;
-CREATE TRIGGER update_book_review_info_delete AFTER DELETE ON user_review_book
-FOR EACH ROW
-BEGIN
+-- DROP TRIGGER IF EXISTS update_book_review_info_delete;
+-- CREATE TRIGGER update_book_review_info_delete AFTER DELETE ON user_review_book
+-- FOR EACH ROW
+-- BEGIN
     
-    UPDATE book
-    SET num_reviews = (SELECT COUNT(*) FROM user_review_book WHERE bookId = OLD.bookId)
-    WHERE bookId = OLD.bookId;
+--     UPDATE book
+--     SET num_reviews = (SELECT COUNT(*) FROM user_review_book WHERE bookId = OLD.bookId)
+--     WHERE bookId = OLD.bookId;
     
-    UPDATE book
-    SET ave_rating =
-        (SELECT IFNULL(SUM(reviews.rating) / book.num_reviews, NULL)
-        FROM reviews
-        JOIN user_review_book ON reviews.reviewId = user_review_book.reviewId
-        WHERE user_review_book.bookId = OLD.bookId)
-    WHERE bookId = OLD.bookId;
-END //
+--     UPDATE book
+--     SET ave_rating =
+--         (SELECT IFNULL(SUM(reviews.rating) / book.num_reviews, NULL)
+--         FROM reviews
+--         JOIN user_review_book ON reviews.reviewId = user_review_book.reviewId
+--         WHERE user_review_book.bookId = OLD.bookId)
+--     WHERE bookId = OLD.bookId;
+-- END //
 
-DELIMITER ;
+-- DELIMITER ;
 
 
-DELIMITER //
+-- DELIMITER //
 
-DROP TRIGGER IF EXISTS update_num_members_insert;
-CREATE TRIGGER update_num_members_insert AFTER INSERT ON book_club_members
-FOR EACH ROW
-BEGIN
+-- DROP TRIGGER IF EXISTS update_num_members_insert;
+-- CREATE TRIGGER update_num_members_insert AFTER INSERT ON book_club_members
+-- FOR EACH ROW
+-- BEGIN
     
-    UPDATE book_club
-    SET num_members = (SELECT COUNT(*) FROM book_club_members WHERE club_name = NEW.club_name)
-    WHERE club_name = NEW.club_name;
-END //
+--     UPDATE book_club
+--     SET num_members = (SELECT COUNT(*) FROM book_club_members WHERE club_name = NEW.club_name)
+--     WHERE club_name = NEW.club_name;
+-- END //
 
-DELIMITER ;
+-- DELIMITER ;
 
 
-DELIMITER //
+-- DELIMITER //
 
-DROP TRIGGER IF EXISTS update_num_members_delete;
-CREATE TRIGGER update_num_members_delete AFTER DELETE ON book_club_members
-FOR EACH ROW
-BEGIN
+-- DROP TRIGGER IF EXISTS update_num_members_delete;
+-- CREATE TRIGGER update_num_members_delete AFTER DELETE ON book_club_members
+-- FOR EACH ROW
+-- BEGIN
 
-    UPDATE book_club
-    SET num_members = (SELECT COUNT(*) FROM book_club_members WHERE club_name = OLD.club_name)
-    WHERE club_name = OLD.club_name;
-END //
+--     UPDATE book_club
+--     SET num_members = (SELECT COUNT(*) FROM book_club_members WHERE club_name = OLD.club_name)
+--     WHERE club_name = OLD.club_name;
+-- END //
 
 DELIMITER ;
 
