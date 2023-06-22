@@ -313,9 +313,16 @@ INSERT INTO author (first_last_name) VALUES
 ('J.K. Rowling');
 
 INSERT INTO genre (name, description) VALUES
-('Historical Fiction', 'Historical fiction is a literary genre in which the plot takes place in a setting located in the past'),
-('Science Fiction', 'Science fiction is a genre of speculative fiction that typically deals with imaginative and futuristic concepts'),
-('Fantasy', 'Fantasy is a genre of speculative fiction set in a fictional universe, often inspired by myth and folklore');
+('Historical Fiction', 'Plot takes place in a setting located in the past'),
+('Science Fiction', 'Deals with imaginative and futuristic concepts'),
+('Fantasy', 'Set in a fictional universe, often inspired by myth and folklore'),
+('Mystery', 'Involves the solving of a crime or puzzle'),
+('Romance', 'Focuses on romantic relationships'),
+('Thriller', 'Generates intense excitement, suspense, and anticipation'),
+('Horror', 'Intends to frighten, scare, or startle its readers'),
+('Adventure', 'Involves exciting journeys or experiences'),
+('Biography', 'Tells the life story of a person'),
+('Self-Help', 'Provides guidance and advice for personal improvement');
 
 
 INSERT INTO book (title, num_pages, publication_year, author, book_genre, librarian_username) VALUES 
