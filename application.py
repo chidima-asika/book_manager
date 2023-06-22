@@ -690,11 +690,9 @@ def other_users_menu(connection, username):
         if choice == "1":
             view_item(connection)
         elif choice == "2":
-            view_column_items(connection, username)
-            # junction table
+            view_column_items(connection, "following_username", "user_follows_user", "username", item_id=username)
         elif choice == "3":
-            view_column_items(connection, username)
-            # junction table
+            view_column_items(connection, "username", "user_follows_user", "following_username", item_id=username)
         elif choice == "4":
             view_item(connection, "user", username)
             # will return the whole row?
