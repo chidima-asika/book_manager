@@ -460,10 +460,56 @@ DELIMITER ;
 
 -- end_bookclub_menu END
 
+-- user_book_menu
+
+DELIMITER //
+
+CREATE PROCEDURE update_status(
+    IN p_status VARCHAR(20),
+    IN p_username VARCHAR(30),
+    IN p_book_id INT
+)
+BEGIN
+    UPDATE book_user
+    SET status = p_status
+    WHERE username = p_username AND bookId = p_book_id;
+END//
+
+DELIMITER ;
+
+-- user_book_menu END
+
+-- user_review_menu
+
+DELIMITER //
+
+CREATE PROCEDURE create_review(
+    IN p_rating INT,
+    IN p_description TEXT,
+    IN p_book_id INT,
+    IN p_username VARCHAR(30)
+)
+BEGIN
+    DECLARE review_id INT;
+
+    INSERT INTO reviews (rating, description)
+    VALUES (p_rating, p_description);
+
+    SET review_id = LAST_INSERT_ID();
+
+    INSERT INTO user_review_book (bookId, username, reviewId)
+    VALUES (p_book_id, p_username, review_id);
+END//
+
+DELIMITER ;
+
+
+-- user_review_menu END
+
 -- general procedures
 
 DELIMITER //
-CREATE PROCEDURE view_item_proc(IN entity VARCHAR(100), IN item_id VARCHAR(100), IN id_column VARCHAR(100))
+CREATE PROCEDURE view_item_proc(IN entity VARCHAR(100), IN id_column VARCHAR(100), IN item_id VARCHAR(100))
 BEGIN
     SET @query = CONCAT('SELECT * FROM ', entity);
     IF item_id IS NOT NULL THEN

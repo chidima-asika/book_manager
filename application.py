@@ -122,6 +122,8 @@ def login():
         else:
             print("Invalid choice")
 
+## ________________________ LIBRARIAN FUNCTIOANLITY  ________________________ ##
+
 
 def librarian_menu(connection, username):
     while True:
@@ -353,6 +355,10 @@ def create_genre(connection):
 
 # _______________________ unique librarian_genre_menu FUNCTIONS END _________________________#
 
+## ________________________ LIBRARIAN FUNCTIOANLITY END ________________________ ##
+
+## ____________________________ USER FUNCTIOANLITY ____________________________ ##
+
 
 def user_menu(connection, username):
     while True:
@@ -405,12 +411,11 @@ def user_books_menu(connection, username):
             if add_book(connection, username, book_id):
                 update_status(connection, username, book_id)
         elif choice == "4":
-            view_item(connection, "book_user", username)  # this is wrong
+            view_item(connection, "book_user", username)
         elif choice == "5":
-            # need to validate that book exists (we should extrapoalte this)
             update_status(connection, username, book_id)
         elif choice == "6":
-            # primary key is two values, need delete_item_junction function
+            # delete_item_junction here
             delete_item(connection, "book_user", book_id)
             delete_book_user(connection, username, book_id)
         elif choice == "7":
@@ -435,30 +440,19 @@ def add_book(connection, username, book_id):
         return False
 
 
-def view_book_user(connection, username):
-    try:
-        with connection.cursor() as cursor:
-            query = "SELECT * FROM book_user WHERE username = %s"
-            cursor.execute(query, (username,))
-            books = cursor.fetchall()
-
-            if books:
-                print("Your Books:")
-                for book in books:
-                    print("Book ID:", book["bookId"])
-                    print("Status:", book["status"])
-                    print("-----")
-            else:
-                print(f"No books found for {username}")
-
-    except Exception as e:
-        print("Error occurred while fetching user books:", e)
-
-
 # Call the login function to start the login process
 def update_status(connection, username, book_id):
     try:
         with connection.cursor() as cursor:
+            query = "SELECT * FROM book_user WHERE username = %s AND bookId = %s"
+            cursor.execute(query, (username, book_id))
+            result = cursor.fetchone()
+
+            if result is None:
+                print("No book found for the provided username and book ID.")
+                print("Please add the book before updating the status.")
+                return
+
             print("Book Status Options:")
             print("1: Read")
             print("2: Currently Reading")
@@ -476,8 +470,7 @@ def update_status(connection, username, book_id):
                 print("Invalid choice. Please try again.")
                 return
 
-            query = "UPDATE book_user SET status = %s WHERE username = %s AND bookId = %s"
-            cursor.execute(query, (status, username, book_id))
+            cursor.callproc('update_status', (status, username, book_id))
             connection.commit()
 
             if cursor.rowcount > 0:
@@ -540,6 +533,7 @@ def user_genre_menu(connection):
         else:
             print("Invalid choice. Please try again.")
 
+
 def user_reviews_menu(connection, username):
     while True:
         print("Reviews Menu:")
@@ -556,24 +550,23 @@ def user_reviews_menu(connection, username):
             review_id = input("Enter Review ID: ")
 
         if choice == "1":
-            write_review(connection, username, book_id)
+            create_review(connection, username, book_id)
         elif choice == "2":
             view_item(connection, "reviews")
         elif choice == "3":
             view_item(connection, "rewiews", review_id)
         elif choice == "4":
-            delete_review(connection, username, review_id)
+            break
+            # delete_item_junction here
         elif choice == "5":
             break
         else:
             print("Invalid choice. Please try again.")
 
-    # stopped here
-
 
 # _______________________ unique user_reviews_menu FUNCTIONS  _________________________#
 
-def write_review(connection, username, book_id):
+def create_review(connection, username, book_id):
     try:
         with connection.cursor() as cursor:
             while True:
@@ -585,40 +578,13 @@ def write_review(connection, username, book_id):
 
             description = input("Enter a description for the review: ")
 
-            review_query = "INSERT INTO reviews (rating, description) VALUES (%s, %s)"
-            cursor.execute(review_query, (rating, description))
-            connection.commit()
-
-            review_id = cursor.lastrowid
-
-            user_review_query = "INSERT INTO user_review_book (bookId, username, reviewId) VALUES (%s, %s, %s)"
-            cursor.execute(user_review_query, (book_id, username, review_id))
+            cursor.callproc('create_review', (rating, description, book_id, username))
             connection.commit()
 
             print("Review added successfully")
 
     except Exception as e:
         print("Error occurred while writing the review:", e)
-
-    
-def delete_review(connection, username, review_id):
-    try:
-        with connection.cursor() as cursor:
-            
-            review_query = "DELETE FROM reviews WHERE reviewId = %s"
-            cursor.execute(review_query, (review_id,))
-            connection.commit()
-
-            # Delete the entry from the user_review_book table
-            user_review_query = "DELETE FROM user_review_book WHERE reviewId = %s"
-            cursor.execute(user_review_query, (review_id,))
-            connection.commit()
-
-            print("Review deleted successfully")
-
-    except Exception as e:
-        print("Error occurred while deleting the review:", e)
-
 
 # _______________________ unique user_reviews_menu FUNCTIONS END _________________________#
 
@@ -695,6 +661,9 @@ def leave_book_club(connection, username, bc_name):
 # _______________________ unique user_book_clubs_menu FUNCTIONS END _________________________#
 
 
+## __________________________ USER FUNCTIOANLITY END __________________________ ##
+
+
 # _______________________ GENERAL FUNCTIONS _________________________#
 
 
@@ -703,7 +672,7 @@ def view_item(connection, entity, item_id=None):
     if table_name and id_column:
         try:
             with connection.cursor() as cursor:
-                cursor.callproc('view_item_proc', (entity, item_id, id_column))
+                cursor.callproc('view_item_proc', (entity, id_column, item_id))
                 results = cursor.fetchall()
 
             if results:
