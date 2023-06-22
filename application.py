@@ -419,9 +419,7 @@ def user_books_menu(connection, username):
         elif choice == "5":
             update_status(connection, username, book_id)
         elif choice == "6":
-            # delete_item_junction here
-            delete_item(connection, "book_user", book_id)
-            delete_book_user(connection, username, book_id)
+            delete_item_junction(connection, "book_user", "username", username, "bookId", book_id)
         elif choice == "7":
             break
         else:
@@ -560,8 +558,8 @@ def user_reviews_menu(connection, username):
         elif choice == "3":
             view_item(connection, "rewiews", review_id)
         elif choice == "4":
-            break
-            # delete_item_junction here
+            delete_item_junction(connection, "user_review_book", "bookId", book_id, 
+                                 "username", usernam, "reviewId", review_id)
         elif choice == "5":
             break
         else:
