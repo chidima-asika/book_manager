@@ -306,7 +306,31 @@ CREATE TABLE user_review_book
 -- ---------------------------- STORED PROCEDURES END ----------------------------
 
 -- librarian_books_menu
--- -- librarian_books_menu END
+-- librarian_books_menu END
+
+-- librarian_bookclub_menu
+-- librarian_bookclub_menu END
+
+-- librarian_books_menu
+-- librarian_books_menu END
+
+-- librarian_books_menu
+-- librarian_books_menu END
+
+-- endn_bookclub_menu
+DELIMITER //
+
+CREATE PROCEDURE view_book_club_personal_proc(IN username VARCHAR(30))
+BEGIN
+
+    SELECT club_name INTO book_club_name
+    FROM book_club_members
+    WHERE member = username;
+
+END //
+
+DELIMITER ;
+-- end_bookclub_menu END
 
 DELIMITER //
 CREATE PROCEDURE view_item_proc(IN entity VARCHAR(100), IN item_id VARCHAR(100), IN id_column VARCHAR(100))

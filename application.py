@@ -443,19 +443,21 @@ def user_book_clubs_menu(connection, username):
 def view_book_club_personal(connection, username):
     try:
         with connection.cursor() as cursor:
-            query = "SELECT club_name FROM book_club_members WHERE member = %s"
-            cursor.execute(query, (username,))
-            book_clubs = cursor.fetchall()
+            # Call the stored procedure
+            cursor.callproc('view_book_club_personal_proc', (username,))
 
-            if book_clubs:
-                print(f"Books Clubs {username} is a member of:")
-                for book_club in book_clubs:
-                    print(book_club["club_name"])
+            result = cursor.fetchall()
+
+            if result:
+                print(f"Book Clubs {username} is a member of:")
+                for row in result:
+                    print(row['club_name'])
             else:
                 print("No book clubs found for your username")
 
     except Exception as e:
         print("Error occurred while fetching book clubs:", e)
+
 
 
 def join_book_club(connection, username, bc_name):
