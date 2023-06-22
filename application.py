@@ -29,7 +29,8 @@ table_mapping = {
     # "book_club_members": ("book_club_members", "member"),
     "author": ("author", "first_last_name"),
     "genre": ("genre", "name"),
-    "book_user": ("book_user", "username")
+    "book_user": ("book_user", "username"),
+    "user": ("user", "username")
 }
 
 
@@ -368,7 +369,8 @@ def user_menu(connection, username):
         print("3. Book Clubs")
         print("4. Authors")
         print("5. Genres")
-        print("6. Logout")
+        print("6. Users")
+        print("7. Logout")
         choice = input("Enter your choice: ")
 
         if choice == "1":
@@ -382,6 +384,8 @@ def user_menu(connection, username):
         elif choice == "5":
             user_genre_menu(connection, username)
         elif choice == "6":
+            other_users_menu(connection, username)
+        elif choice == "7":
             print("Logged out")
             break
         else:
@@ -659,6 +663,73 @@ def leave_book_club(connection, username, bc_name):
 
 
 # _______________________ unique user_book_clubs_menu FUNCTIONS END _________________________#
+
+def other_users_menu(connection, username):
+    while True:
+        print("Other Users Menu:")
+        print("1. View All Users")
+        print("2. View Users You Follow")
+        print("3. View Users Who Follow You")
+        print("4. View Number of Followers and Number Following")
+        print("5. Follow a User")
+        print("6. Unfollow a User")
+        print("7. Go Back")
+        choice = input("Enter your choice: ")
+
+        if choice in ["5", "6"]:
+            second_username = input("Enter the user's username: ")
+
+            if second_username == username:
+                print("Cannot enter your own username. Please try again.")
+                return
+
+            if not validate_instance_exists(connection, 'users', 'username', second_username):
+                print("User does not exist. Please try again.")
+                return
+
+        if choice == "1":
+            view_item(connection)
+        elif choice == "2":
+            view_column_items(connection, username)
+            # junction table
+        elif choice == "3":
+            view_column_items(connection, username)
+            # junction table
+        elif choice == "4":
+            view_item(connection, "user", username)
+            # will return the whole row?
+            # should not return password 
+        elif choice == "5":
+            follow_user(connection, username, second_username)
+        elif choice == "6":
+            unfollow_user(connection, username, second_username)
+        elif choice == "7":
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+#_____________________  unique other_users_menu FUNCTIONS _____________________# 
+
+def follow_user(connection, username, second_username):
+    try:
+        with connection.cursor() as cursor:
+            cursor.callproc('follow_user_proc', (username, second_username))
+            connection.commit()
+            print(f"You are now following {second_username}")
+    except Exception as e:
+        print("Error occurred while following the user:", e)
+        
+        
+def unfollow_user(connection, username, second_username):
+    try:
+        with connection.cursor() as cursor:
+            cursor.callproc('unfollow_user_proc', (username, second_username))
+            connection.commit()
+            print(f"You have unfollowed {second_username}")
+    except Exception as e:
+        print("Error occurred while unfollowing the user:", e)
+
+#_____________________  unique other_users_menu FUNCTIONS END _____________________# 
 
 
 ## __________________________ USER FUNCTIOANLITY END __________________________ ##

@@ -506,6 +506,35 @@ DELIMITER ;
 
 -- user_review_menu END
 
+-- other_users_menu
+
+DELIMITER //
+
+CREATE PROCEDURE follow_user_proc(
+    IN p_username VARCHAR(30),
+    IN p_second_username VARCHAR(30)
+)
+BEGIN
+    INSERT INTO user_follows_user (username, following_username)
+    VALUES (p_username, p_second_username);
+END //
+DELIMITER ;
+
+DELIMITER //
+
+CREATE PROCEDURE unfollow_user_proc(
+    IN p_username VARCHAR(30),
+    IN p_second_username VARCHAR(30)
+)
+BEGIN
+    DELETE FROM user_follows_user
+    WHERE username = p_username AND following_username = p_second_username;
+END //
+DELIMITER ;
+
+
+-- other_user_menu END
+
 -- general procedures
 
 DELIMITER //
