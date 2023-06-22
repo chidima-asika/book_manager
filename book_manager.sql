@@ -65,8 +65,8 @@ CREATE TABLE book
     author VARCHAR(100) NOT NULL,
     book_genre VARCHAR(100) NOT NULL,
     librarian_username VARCHAR(30),
-    
 
+    UNIQUE(title,author),
 	FOREIGN KEY (book_genre) REFERENCES genre (name) ON UPDATE CASCADE ON DELETE CASCADE,
 	FOREIGN KEY (author) REFERENCES author (first_last_name) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (librarian_username) REFERENCES librarian (username) ON UPDATE CASCADE ON DELETE SET NULL
@@ -473,8 +473,6 @@ BEGIN
 END //
 
 DELIMITER ;
-
-
 
 -- ---------------------------------- DATA DUMP ----------------------------------
 

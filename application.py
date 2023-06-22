@@ -47,7 +47,7 @@ def create_user(connection, user_type):
     
     if user_type == "librarian":
         secret_passphrase = input(
-                "If you really want to become a librarian, answer this: What powers the wordd?")
+                "If you really want to become a librarian, answer this: What powers the world?")
         if secret_passphrase in ("Books", "books"):
             pass
         else:
