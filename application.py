@@ -172,7 +172,9 @@ def librarian_book_clubs_menu(connection, username):
         elif choice == "3":
             view_item(connection, "book_club")
         elif choice == "4":
-            view_book_club_members(connection, bc_name)
+            # view_book_club_members(connection, bc_name)
+            view_column_items(connection, "member", "book_club_members", bc_name, "club_name")
+
         elif choice == "5":
             delete_item(connection, "book_club", bc_name)
         elif choice == "6":
@@ -550,6 +552,23 @@ def view_item(connection, entity, item_id=None):
                 print(f"{entity} not found")
         except Exception as e:
             print("Error occurred while viewing the item:", e)
+
+def view_column_items(connection, select_col, entity, id_column, item_id=None):
+    try:
+        with connection.cursor() as cursor:
+            cursor.callproc('view_column_items_proc', (select_col, entity, id_column, item_id))
+            results = cursor.fetchall()
+
+        if results:
+            print("Item Details:")
+            for item in results:
+                for key, value in item.items():
+                    print(f"{key}: {value}")
+                print("-----")
+        else:
+            print(f"{entity} not found")
+    except Exception as e:
+        print("Error occurred while viewing the item:", e)
 
 
 

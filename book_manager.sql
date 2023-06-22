@@ -407,12 +407,30 @@ CREATE PROCEDURE view_item_proc(IN entity VARCHAR(100), IN item_id VARCHAR(100),
 BEGIN
     SET @query = CONCAT('SELECT * FROM ', entity);
     IF item_id IS NOT NULL THEN
+        SET @query = CONCAT(@query, ' WHERE ', ,id_column, ' = ', item_id);
+    END IF;
+    PREPARE stmt FROM @query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+END //
+DELIMITER ;
+
+DELIMITER //
+
+-- view_column_items_proc', (select_col, entity, item_id, id_column))
+DELIMITER //
+
+CREATE PROCEDURE view_column_items_proc(IN select_col VARCHAR(100), IN entity VARCHAR(100), IN id_column VARCHAR(100), IN item_id VARCHAR(100))
+BEGIN
+    SET @query = CONCAT('SELECT ', select_col, ' FROM ', entity);
+    IF item_id IS NOT NULL THEN
         SET @query = CONCAT(@query, ' WHERE ', id_column, ' = ', item_id);
     END IF;
     PREPARE stmt FROM @query;
     EXECUTE stmt;
     DEALLOCATE PREPARE stmt;
 END //
+
 DELIMITER ;
 
 DELIMITER //
