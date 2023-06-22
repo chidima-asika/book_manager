@@ -291,6 +291,14 @@ DELIMITER ;
 
 
 
+CREATE PROCEDURE delete_junction_instance(IN table_name VARCHAR(100), IN primary_key_columns VARCHAR(500), IN primary_key_values VARCHAR(500))
+BEGIN
+    SET @query = CONCAT('DELETE FROM ', table_name, ' WHERE ', primary_key_columns, ' = ', primary_key_values);
+    PREPARE stmt FROM @query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+END;
+
 -- ---------------------------- STORED PROCEDURES END ----------------------------
 
 
@@ -358,4 +366,3 @@ INSERT INTO user_review_book (bookId, username, reviewId) VALUES
 (1, 'jane_doe_22', 5);
 
 -------------------------------- DATA DUMP END --------------------------------
-
