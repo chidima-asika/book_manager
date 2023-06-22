@@ -98,7 +98,6 @@ def librarian_books_menu(connection, username):
         choice = input("Enter your choice: ")
         if choice not in ["1", "4", "5"]:
             book_id = input("Enter the Book ID: ")
-            book_id = int(book_id)
 
         if choice == "1":
             create_book(connection, username)
