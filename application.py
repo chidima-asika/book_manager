@@ -46,9 +46,9 @@ def check_existing_user(connection, username):
 def create_user(connection, user_type):
     
     if user_type == "librarian":
-        secret_passphase = input(
-                "If you really want to become a librarian, answer this: What powers the words?")
-        if secret_passphase in ("Books", "books"):
+        secret_passphrase = input(
+                "If you really want to become a librarian, answer this: What powers the wordd?")
+        if secret_passphrase in ("Books", "books"):
             pass
         else:
             print("Incorrect!")
