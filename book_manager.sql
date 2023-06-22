@@ -474,6 +474,23 @@ END //
 
 DELIMITER ;
 
+DELIMITER //
+CREATE PROCEDURE update_items_proc(
+    IN table_name VARCHAR(100),
+    IN column_name VARCHAR(100),
+    IN new_value VARCHAR(100),
+    IN where_column VARCHAR(100),
+    IN where_value VARCHAR(100)
+)
+BEGIN
+    SET @query = CONCAT('UPDATE ', table_name, ' SET ', column_name, ' = "', new_value, '" WHERE ', where_column, ' = "', where_value, '"');
+    PREPARE stmt FROM @query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+END //
+DELIMITER ;
+
+
 -- ---------------------------------- DATA DUMP ----------------------------------
 
 INSERT INTO librarian (username, password, first_name, last_name) VALUES

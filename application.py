@@ -130,6 +130,7 @@ def librarian_menu(connection, username):
         print("2. Book Clubs")
         print("3. Authors")
         print("4. Genres")
+        print("5. Update Existing Value In Table")
         print("5. Logout")
         choice = input("Enter your choice: ")
 
@@ -142,10 +143,43 @@ def librarian_menu(connection, username):
         elif choice == "4":
             genres_menu(connection)
         elif choice == "5":
+            lib_updates(connection)
+        elif choice == "6":
             print("Logged out")
             break
         else:
             print("Invalid choice. Please try again.")
+
+def lib_updates(connection):
+    print("You may update tables: user, book, book_club, author, and genre")
+    table_name = input("Which table would you like to update?: ")
+    
+    if table_name in ("user", "book", "book_club", "author", "genre"):
+        print(f"Columns for {table_name}: ")
+        
+        try:
+            with connection.cursor() as cursor:
+                query = f"SHOW COLUMNS FROM {table_name}"
+                cursor.execute(query)
+                result = cursor.fetchall()
+                table_column_names = [row['Field'] for row in result]
+                print(table_column_names)
+        except Exception as e:
+            print("Error occurred while retrieving column names:", e)
+            return
+        
+        column_name = input("Which column would you like to update?: ")
+        where_column = input("Which column would you like to set as the condition?: ")
+        where_value = input("What is the value of the condition column?: ")
+        new_value = input("What is the new value for the selected column?: ")
+        
+        if validate_instance_exists(connection, table_name, where_column, where_value):
+            update_value(connection, table_name, column_name, new_value, where_column, where_value)
+            print("Update successful.")
+        else:
+            print("The specified instance does not exist in the table.")
+    else:
+        print("Invalid table name.")
 
 
 def librarian_books_menu(connection, username):
@@ -282,7 +316,8 @@ def user_menu(connection, username):
         print("3. Book Clubs")
         print("4. Authors")
         print("5. Genres")
-        print("6. Logout")
+        print("6. Change Password")
+        print("7. Logout")
         choice = input("Enter your choice: ")
 
         if choice == "1":
@@ -297,6 +332,9 @@ def user_menu(connection, username):
         elif choice == "5":
             genres_menu(connection)
         elif choice == "6":
+            new_value = input("WHat would you like to change you password to?:")
+            update_value(connection, "users", "password", new_value, "username", username)
+        elif choice == "7":
             print("Logged out")
             break
         else:
@@ -562,6 +600,15 @@ def leave_book_club(connection, username, bc_name):
 # =============================================================================
 
 # _______________________ GENERAL FUNCTIONS _________________________#
+
+def update_value(connection, table_name, column_name, new_value, where_column, where_value):
+    try:
+        with connection.cursor() as cursor:
+            cursor.callproc('update_items_proc', (table_name, column_name, new_value, where_column, where_value))
+            connection.commit()
+            print("Value updated successfully")
+    except Exception as e:
+        print("Error occurred while updating value:", e)
 
 def authors_menu(connection):
     while True:
