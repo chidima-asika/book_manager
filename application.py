@@ -463,20 +463,19 @@ def view_book_club_personal(connection, username):
 def join_book_club(connection, username, bc_name):
     try:
         with connection.cursor() as cursor:
-            query = "SELECT club_name FROM book_club_members WHERE club_name = %s AND member = %s"
-            cursor.execute(query, (bc_name, username))
+            # Call the stored procedure
+            cursor.callproc('join_book_club_proc', (username, bc_name))
+
+            # Fetch the result message
             result = cursor.fetchone()
 
             if result:
-                print("You are already a member of this book club")
+                print(result['message'])
             else:
-                query = "INSERT INTO book_club_members (club_name, member) VALUES (%s, %s)"
-                cursor.execute(query, (bc_name, username))
-                connection.commit()
-                print(f"Joined the book club {bc_name} successfully")
-
+                print("Error occurred while joining the book club")
     except Exception as e:
         print("Error occurred while joining the book club:", e)
+
 
 def leave_book_club(connection, username, bc_name):
     try:

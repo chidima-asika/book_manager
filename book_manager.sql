@@ -323,13 +323,39 @@ DELIMITER //
 CREATE PROCEDURE view_book_club_personal_proc(IN username VARCHAR(30))
 BEGIN
 
-    SELECT club_name INTO book_club_name
+    SELECT club_name 
     FROM book_club_members
     WHERE member = username;
 
 END //
 
 DELIMITER ;
+
+DELIMITER //
+
+CREATE PROCEDURE join_book_club_proc(IN username VARCHAR(30), IN bc_name VARCHAR(100))
+BEGIN
+    DECLARE is_member INT;
+    
+    -- Check if the user is already a member of the book club
+    SELECT COUNT(*) INTO is_member
+    FROM book_club_members
+    WHERE club_name = bc_name AND member = username;
+
+    IF is_member > 0 THEN
+        SELECT 'You are already a member of this book club' AS 'message';
+    ELSE
+        -- Insert the user as a member of the book club
+        INSERT INTO book_club_members (club_name, member)
+        VALUES (bc_name, username);
+        
+        SELECT CONCAT('Joined the book club ', bc_name, ' successfully') AS 'message';
+    END IF;
+    
+END //
+
+DELIMITER ;
+
 -- end_bookclub_menu END
 
 DELIMITER //
@@ -413,8 +439,7 @@ INSERT INTO book_club (club_name, bookId, librarian) VALUES
 INSERT INTO book_club_members (club_name, member) VALUES
 ('PotterHeads', 'test_user'),
 ('Classics Lovers', 'test_user'),
-('PotterHeads', 'jane_doe_22'),
-('Classics Lovers', 'jane_doe_22');
+('PotterHeads', 'jane_doe_22');
 
 INSERT INTO book_user (bookId, username, status) VALUES
 (1, 'jane_doe_22', 'Read'),
