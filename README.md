@@ -1,6 +1,8 @@
+<!-- how can comeone else run this -->
+
 ## BookManager
 
-Our project is a console-based book management system designed to assist readers in organizing their book collections. Users can keep track of the books they are currently reading, write reviews, join book clubs, and follow other users. The user interface is simple and intuitive, allowing users to interact with the system. Users can retrieve details about a specific book, including authors and reviews. The database is self-managed by users, as it puts trust in readers. This application is ideal for book lovers looking for a convenient way to manage their reading experience.
+Our project is a console-based book management system designed to assist readers in organizing their book collections. Users can keep track of the books they are currently reading, write reviews, join book clubs, and follow other users. The user interface is simple and intuitive, allowing users to interact with the system. Users can retrieve details about a specific book, including authors and reviews. The database is self-managed by users, as it puts trust in users. This application is ideal for book lovers looking for a convenient way to manage their reading experience. Users can become librarians if they know the secret passhrase!
  
 
 ## Table of Contents
@@ -16,7 +18,7 @@ Our project is a console-based book management system designed to assist readers
 Before running the project, make sure you have the following software and libraries installed:
 
 - MySQL Server: Download and install MySQL Server from the [official website](https://dev.mysql.com/downloads/). Follow the installation instructions provided.
-- MySQL Connector/J: Download the JDBC driver for MySQL from the [MySQL website](https://dev.mysql.com/downloads/connector/j/). Choose the appropriate version for your system and follow the installation instructions.
+- MySQL Workbench Comminity Edition: Another alternative that can be downloaded here [website](https://dev.mysql.com/downloads/workbench/). Follow the installation instructions provided based on your device. 
 
 ## Installation
 
@@ -24,9 +26,9 @@ To install the project, follow these steps:
 
 1. Clone or download the project source code from the repository.
 2. Open your preferred IDE.
-3. Build the project using the appropriate build command or IDE feature. 
+3. Build the project using the appropriate build command or IDE feature. (must have mysql extension or database extension depinging on IDE)
 
-please install the following dependcies forfor beggining
+please install the following dependcies before starting
 
 `pip3 install mysql-connector-python`
 `pip3 install pymysql`
@@ -54,9 +56,15 @@ Before running the project, you need to configure the database connection:
    - Book Clubs: Join book clubs, create new clubs, and interact with club members.
    - Authors: Explore authors and their books.
    - Genres: Browse books by genres.
+   - User: follow other users
    - Logout: Exit the program and logout from your account.
-3. Choose an option from the menu by entering the corresponding number.
+3. Choose an option from the menu by entering the valid corresponding number.
 4. Follow the prompts and interact with the program based on the chosen option.
+1. Exact spelling is important so please view everything to ensure you spell things as they are listed
 
-.
+
+Enjoy reading your books in organized peace!
+
+![Image Description](relative/path/to/image.jpg)
+
 
