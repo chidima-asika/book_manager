@@ -563,6 +563,15 @@ def leave_book_club(connection, username, bc_name):
 
 # _______________________ GENERAL FUNCTIONS _________________________#
 
+def update_value(connection, table_name, column_name, new_value, where_column, where_value):
+    try:
+        with connection.cursor() as cursor:
+            cursor.callproc('update_items_proc', (table_name, column_name, new_value, where_column, where_value))
+            connection.commit()
+            print("Value updated successfully")
+    except Exception as e:
+        print("Error occurred while updating value:", e)
+
 
 def view_item(connection, entity, item_id=None):
     table_name, id_column = table_mapping.get(entity)
