@@ -60,11 +60,11 @@ CREATE TABLE book
     title VARCHAR(100) NOT NULL,
     num_pages INT NOT NULL,
     publication_year YEAR NOT NULL,
-    num_reviews INT DEFAULT 0,
-    ave_rating DECIMAL(3, 2) DEFAULT NULL,
     author VARCHAR(100) NOT NULL,
     book_genre VARCHAR(100) NOT NULL,
     librarian_username VARCHAR(30),
+    num_reviews INT DEFAULT 0,
+    ave_rating DECIMAL(3, 2) DEFAULT NULL,
     
 
 	FOREIGN KEY (book_genre) REFERENCES genre (name) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -302,10 +302,6 @@ CREATE TABLE user_review_book
 
 -- ------------------------------ STORED PROCEDURES ------------------------------ 
 
-
-
--- ---------------------------- STORED PROCEDURES END ----------------------------
-
 -- create_users_libs
 
 DELIMITER //
@@ -337,10 +333,24 @@ DELIMITER ;
 -- create_users_lib END
 
 
--- librarian_bookclub_menu
--- librarian_bookclub_menu END
-
 -- librarian_books_menu
+
+DELIMITER //
+CREATE PROCEDURE create_book(
+    IN p_title VARCHAR(100),
+    IN p_num_pages INT,
+    IN p_publication_year YEAR,
+    IN p_author VARCHAR(100),
+    IN p_book_genre VARCHAR(100),
+    IN p_librarian_username VARCHAR(30)
+)
+BEGIN
+    INSERT INTO book (title, num_pages, publication_year, author, book_genre, librarian_username)
+    VALUES (p_title, p_num_pages, p_publication_year, p_author, p_book_genre, p_librarian_username);
+END //
+DELIMITER ;
+
+
 -- librarian_books_menu END
 
 -- librarian_bookclub_menu
@@ -363,7 +373,7 @@ DELIMITER ;
 
 -- librarian_bookclub_menu END
 
--- endn_bookclub_menu
+-- end_bookclub_menu
 
 DELIMITER //
 
@@ -417,6 +427,8 @@ DELIMITER ;
 
 
 -- end_bookclub_menu END
+
+-- general procedures
 
 DELIMITER //
 CREATE PROCEDURE view_item_proc(IN entity VARCHAR(100), IN item_id VARCHAR(100), IN id_column VARCHAR(100))
@@ -474,6 +486,9 @@ END //
 
 DELIMITER ;
 
+-- general procedures END
+
+-- ---------------------------- STORED PROCEDURES END ----------------------------
 
 
 -- ---------------------------------- DATA DUMP ----------------------------------

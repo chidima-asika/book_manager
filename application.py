@@ -180,32 +180,25 @@ def create_book(connection, username):
     try:
         with connection.cursor() as cursor:
             title = input("Enter the title: ")
-            author = input("Enter the author's full name: ")
-
-            if not validate_instance_exists(connection, 'author', 'first_last_name', author):
-                print(
-                    "Author not found in the database. Please create the author before creating a book.")
-                return
-
-            book_genre = input("Enter the genre name: ")
-
-            if not validate_instance_exists(connection, 'genre', 'name', book_genre):
-                print(
-                    "Genre not found in the database. Please create the genre before creating a book.")
-                return
-
             num_pages = int(input("Enter the number of pages: "))
             publication_year = int(input("Enter the publication year: "))
-
+            author = input("Enter the author's full name: ")
+            book_genre = input("Enter the genre name: ")
             librarian_username = username
+
+            if not validate_instance_exists(connection, 'author', 'first_last_name', author):
+                print("Author not found in the database. Please create the author before creating a book.")
+                return
+
+            if not validate_instance_exists(connection, 'genre', 'name', book_genre):
+                print("Genre not found in the database. Please create the genre before creating a book.")
+                return
 
             if validate_instance_exists(connection, 'book', 'title', title):
                 print("The book already exists in the database.")
                 return
 
-            query = "INSERT INTO book (title, author, num_pages, publication_year, book_genre, librarian_username) " \
-                    "VALUES (%s, %s, %s, %s, %s, %s)"
-            cursor.execute(query, (title, author, num_pages, publication_year, book_genre, librarian_username))
+            cursor.callproc('create_book', (title, num_pages, publication_year, author, book_genre, librarian_username))
             connection.commit()
             print("Book created successfully")
 
