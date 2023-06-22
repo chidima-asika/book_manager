@@ -390,8 +390,8 @@ def user_books_menu(connection, username):
         elif choice == "2":
             view_item(connection, "book", book_id)
         elif choice == "3":
-            add_book(connection, username, book_id)
-            update_status(connection, username, book_id) # these can be one function b/c one error should stop function
+            if add_book(connection, username, book_id):
+                update_status(connection, username, book_id)
         elif choice == "4":
             view_item(connection, "book_user", username) # this is wrong
         elif choice == "5":
@@ -410,13 +410,15 @@ def user_books_menu(connection, username):
 def add_book(connection, username, book_id):
     try:
         with connection.cursor() as cursor:
-            query = "INSERT INTO book_user (bookId, username) VALUES (%s, '%')"
-            cursor.execute(query, (book_id,username))
+            query = "INSERT INTO book_user (bookId, username) VALUES (%s, %s)"
+            cursor.execute(query, (book_id, username))
             connection.commit()
             print("Book added successfully")
+            return True
 
     except Exception as e:
         print("Error occurred while adding the book:", e)
+        return False
 
 
 def view_book_user(connection, username):
