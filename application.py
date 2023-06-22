@@ -98,6 +98,7 @@ def librarian_books_menu(connection, username):
         choice = input("Enter your choice: ")
         if choice not in ["1", "4", "5"]:
             book_id = input("Enter the Book ID: ")
+            book_id = int(book_id)
 
         if choice == "1":
             create_book(connection, username)
@@ -384,6 +385,7 @@ def user_books_menu(connection, username):
 
         if choice not in ["1", "4"]:
             book_id = input("Enter book id: ")
+            book_id = int(book_id)
 
         if choice == "1":
             view_item(connection, "book")
@@ -494,28 +496,24 @@ def user_reviews_menu(connection, username):
         print("1. Write a Review for a Book")
         print("2. View All Reviews")
         print("3. View a Review")
-        print("4. Update a Review")
-        print("5. Delete a Review")
-        print("6. Go Back")
+        print("4. Delete a Review")
+        print("5. Go Back")
         choice = input("Enter your choice: ")
 
-        if choice not in ["2"]:
+        if choice in ["1"]:
             book_id = input("Enter Book ID: ")
+        elif choice in ["3", "4"]:
+            review_id = input("Enter Review ID: ")
 
         if choice == "1":
             write_review(connection, username, book_id)
         elif choice == "2":
             view_item(connection, "reviews")
-            view_all_reviews(connection)
         elif choice == "3":
-            view_reviews_with_condition(connection)
+            view_item(connection, "rewiews", review_id)
         elif choice == "4":
-            review_id = input("Enter the Review ID: ")
-            update_review(connection, username, review_id)
+            delete_review(connection, username, review_id)
         elif choice == "5":
-            book_id = input("Enter the Book ID: ")
-            delete_review(connection, username, book_id)
-        elif choice == "6":
             break
         else:
             print("Invalid choice. Please try again.")
@@ -523,7 +521,57 @@ def user_reviews_menu(connection, username):
     # stopped here
 
 
-# _______________________ unique user_books_menu FUNCTIONS END _________________________#
+# _______________________ unique user_reviews_menu FUNCTIONS  _________________________#
+
+def write_review(connection, username, book_id):
+    try:
+        with connection.cursor() as cursor:
+            while True:
+                rating = int(input("Enter a rating (1-5): "))
+                if rating < 1 or rating > 5:
+                    print("Invalid rating. Please enter a number between 1 and 5.")
+                else:
+                    break
+
+            description = input("Enter a description for the review: ")
+
+            review_query = "INSERT INTO reviews (rating, description) VALUES (%s, %s)"
+            cursor.execute(review_query, (rating, description))
+            connection.commit()
+
+            review_id = cursor.lastrowid
+
+            user_review_query = "INSERT INTO user_review_book (bookId, username, reviewId) VALUES (%s, %s, %s)"
+            cursor.execute(user_review_query, (book_id, username, review_id))
+            connection.commit()
+
+            print("Review added successfully")
+
+    except Exception as e:
+        print("Error occurred while writing the review:", e)
+
+    
+def delete_review(connection, username, review_id):
+    try:
+        with connection.cursor() as cursor:
+            
+            review_query = "DELETE FROM reviews WHERE reviewId = %s"
+            cursor.execute(review_query, (review_id,))
+            connection.commit()
+
+            # Delete the entry from the user_review_book table
+            user_review_query = "DELETE FROM user_review_book WHERE reviewId = %s"
+            cursor.execute(user_review_query, (review_id,))
+            connection.commit()
+
+            print("Review deleted successfully")
+
+    except Exception as e:
+        print("Error occurred while deleting the review:", e)
+
+
+# _______________________ unique user_reviews_menu FUNCTIONS END _________________________#
+
 
 def user_book_clubs_menu(connection, username):
     while True:
