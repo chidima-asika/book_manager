@@ -353,6 +353,38 @@ DELIMITER ;
 
 -- librarian_books_menu END
 
+-- librarian_author_menu
+
+DELIMITER //
+CREATE PROCEDURE create_author(
+    IN p_author_name VARCHAR(100)
+)
+BEGIN
+    INSERT INTO author (first_last_name)
+    VALUES (p_author_name);
+END //
+DELIMITER ;
+
+
+-- librarian_author_menu END
+
+-- librarian_genre_menu 
+
+DELIMITER //
+CREATE PROCEDURE create_genre(
+    IN p_genre_name VARCHAR(100),
+    IN p_description VARCHAR(500)
+)
+BEGIN
+    INSERT INTO genre (name, description)
+    VALUES (p_genre_name, p_description);
+END //
+DELIMITER ;
+
+
+-- librarian_genre_menu END
+
+
 -- librarian_bookclub_menu
 DELIMITER //
 
