@@ -275,73 +275,6 @@ def genres_menu(connection):
             print("Invalid choice. Please try again.")
 
 
-def view_item(connection, entity, id=None):
-    table_name, id_column = table_mapping.get(entity)
-    if table_name and id_column:
-        try:
-            with connection.cursor() as cursor:
-                if id is None:
-                    query = f"SELECT * FROM {table_name}"
-                    cursor.execute(query)
-                    items = cursor.fetchall()
-                else:
-                    query = f"SELECT * FROM {table_name} WHERE {id_column} = %s"
-                    cursor.execute(query, (id,))
-                    items = cursor.fetchone()
-
-                if items:
-                    print("Item Details:")
-                    if isinstance(items, dict):  # Single item
-                        items = [items]
-                    for item in items:
-                        for key, value in item.items():
-                            print(f"{key}: {value}")
-                        print("-----")
-                else:
-                    print(f"{entity} not found")
-        except Exception as e:
-            print("Error occurred while viewing the item:", e)
-    else:
-        print("Invalid entity. Please try again.")
-
-
-def view_item2(connection, entity, id):
-    table_name, id_column = table_mapping.get(entity)
-    if table_name and id_column:
-        try:
-            with connection.cursor() as cursor:
-                query = f"SELECT * FROM {table_name} WHERE {id_column} = %s"
-                cursor.execute(query, (id,))
-                item = cursor.fetchone()
-
-                if item:
-                    print("Item Details:")
-                    for key, value in item.items():
-                        print(f"{key}: {value}")
-                else:
-                    print("Item not found")
-        except Exception as e:
-            print("Error occurred while viewing the item:", e)
-    else:
-        print("Invalid entity. Please try again.")
-
-def delete_item(connection, entity, key):
-    table_name, id_column = table_mapping.get(entity)
-    if table_name and id_column:
-        try:
-            with connection.cursor() as cursor:
-                query = f"DELETE FROM {table_name} WHERE {id_column} = %s"
-                cursor.execute(query, (key,))
-                connection.commit()
-                print("Item deleted successfully")
-        except Exception as e:
-            print("Error occurred while deleting the item:", e)
-    else:
-        print("Invalid entity. Please try again.")
-        # need to add validation that the entity exists
-
-# _______________________ GENERAL FUNCTION END _________________________#
-
 def user_menu(connection, username):
     while True:
         print("Menu:")
@@ -385,7 +318,6 @@ def user_books_menu(connection, username):
 
         if choice not in ["1", "4"]:
             book_id = input("Enter book id: ")
-            book_id = int(book_id)
 
         if choice == "1":
             view_item(connection, "book")
@@ -762,6 +694,7 @@ def delete_item(connection, entity, id):
             print("Error occurred while deleting the item:", e)
     else:
         print("Invalid entity or id. Please try again.")
+# need to add validation that the entity exists
 
 # _______________________ GENERAL FUNCTIONS END _________________________#
 
