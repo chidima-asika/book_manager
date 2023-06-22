@@ -15,10 +15,12 @@ def connect_to_database():
     db_user, db_password = get_database_credentials()
 
     try:
-        connection = pymysql.connect(host=db_host, user=db_user, password=db_password, db=db_name, cursorclass=pymysql.cursors.DictCursor)
+        connection = pymysql.connect(
+            host=db_host, user=db_user, password=db_password, db=db_name, cursorclass=pymysql.cursors.DictCursor)
         return connection
     except pymysql.Error as e:
         print("Failed to connect to the database:", e)
+
 
 table_mapping = {
     "book": ("book", "bookId"),
@@ -30,17 +32,57 @@ table_mapping = {
     "book_user": ("book_user", "username")
 }
 
-# create new user
-# reset password
-# loas genre
-#  test validate theory
+
+def check_existing_user(connection, username):
+    with connection.cursor() as cursor:
+        # Check if the username already exists in both user and librarian tables
+        query = "SELECT username FROM user WHERE username = %s UNION SELECT username FROM librarian WHERE username = %s"
+        cursor.execute(query, (username, username))
+        existing_user = cursor.fetchone()
+
+        return existing_user is not None
+
+
+def create_user(connection, user_type):
+    
+    if user_type == "librarian":
+        secret_passphase = input(
+                "If you really want to become a librarian, answer this: What powers the words?")
+        if secret_passphase in ("Books", "books"):
+            pass
+        else:
+            print("Incorrect!")
+            return
+    username = input("Enter a new username: ")
+
+    if check_existing_user(connection, username):
+        print(
+            "Username already exists. Please choose a different username.")
+    else:
+        password = input("Enter a new password: ")
+        first_name = input("Enter the first name: ")
+        last_name = input("Enter the last name: ")
+
+        try:
+            with connection.cursor() as cursor:
+                query = "CALL create_users_proc(%s, %s, %s, %s, %s)"
+                cursor.execute(
+                    query, (username, password, first_name, last_name, user_type))
+                connection.commit()
+                print(f"New {user_type} account created successfully")
+
+        except Exception as e:
+            print(
+                f"Error occurred while creating a new {user_type} account:", e)
+
 
 def login():
     connection = connect_to_database()
 
     if connection:
         print("1. Sign In")
-        print("2. Create New Account")
+        print("2. Create New User Account")
+        print("3. Become A Librarian")
 
         choice = input("Enter your choice: ")
 
@@ -50,7 +92,7 @@ def login():
 
             try:
                 with connection.cursor() as cursor:
-                    query = "SELECT * FROM librarian WHERE lib_username = %s AND password = %s"
+                    query = "SELECT * FROM librarian WHERE username = %s AND password = %s"
                     cursor.execute(query, (username, password))
                     librarian = cursor.fetchone()
 
@@ -72,34 +114,13 @@ def login():
                 print("Error occurred during login:", e)
 
         elif choice == "2":
-            while True:
-                username = input("Enter a new username: ")
+            create_user(connection, "user")
 
-                try:
-                    with connection.cursor() as cursor:
-                        # Check if the username already exists
-                        query = "SELECT * FROM user WHERE username = %s"
-                        cursor.execute(query, (username,))
-                        existing_user = cursor.fetchone()
-
-                        if existing_user:
-                            print("Username already exists. Please choose a different username.")
-                        else:
-                            # Insert the new user into the user table
-                            password = input("Enter a new password: ")
-                            query = "INSERT INTO user (username, password) VALUES (%s, %s)"
-                            cursor.execute(query, (username, password))
-                            connection.commit()
-                            print("New account created successfully")
-                            break  # Break out of the loop when the account is created
-
-                except Exception as e:
-                    print("Error occurred while creating a new account:", e)
-
+        elif choice == "3":
+            create_user(connection, "librarian")
 
         else:
             print("Invalid choice")
-
 
 
 def librarian_menu(connection, username):
@@ -154,6 +175,7 @@ def librarian_books_menu(connection, username):
 
 # _______________________ unique librarian_books_menu FUNCTIONS _________________________#
 
+
 def create_book(connection, username):
     try:
         with connection.cursor() as cursor:
@@ -161,13 +183,15 @@ def create_book(connection, username):
             author = input("Enter the author's full name: ")
 
             if not validate_instance_exists(connection, 'author', 'first_last_name', author):
-                print("Author not found in the database. Please create the author before creating a book.")
+                print(
+                    "Author not found in the database. Please create the author before creating a book.")
                 return
 
             book_genre = input("Enter the genre name: ")
 
             if not validate_instance_exists(connection, 'genre', 'name', book_genre):
-                print("Genre not found in the database. Please create the genre before creating a book.")
+                print(
+                    "Genre not found in the database. Please create the genre before creating a book.")
                 return
 
             num_pages = int(input("Enter the number of pages: "))
@@ -221,6 +245,7 @@ def librarian_book_clubs_menu(connection, username):
 
 # _______________________ unique librarian_book_clubs_menu FUNCTIONS _________________________#
 
+
 def create_book_club(connection, librarian_username):
     club_name = input("Enter the Book Club name: ")
     book_id = input("Enter the Book ID associated with the Book Club: ")
@@ -236,7 +261,8 @@ def create_book_club(connection, librarian_username):
                     return
 
                 # Call the stored procedure
-                cursor.callproc('create_book_club_proc', (club_name, book_id, librarian_username))
+                cursor.callproc('create_book_club_proc',
+                                (club_name, book_id, librarian_username))
                 result = cursor.fetchone()
 
                 if result:
@@ -298,13 +324,16 @@ def user_books_menu(connection, username):
             view_item(connection, "book", book_id)
         elif choice == "3":
             add_book(connection, username, book_id)
-            update_status(connection, username, book_id) # these can be one function b/c one error should stop function
+            # these can be one function b/c one error should stop function
+            update_status(connection, username, book_id)
         elif choice == "4":
-            view_item(connection, "book_user", username) # this is wrong
+            view_item(connection, "book_user", username)  # this is wrong
         elif choice == "5":
-            update_status(connection, username, book_id) # need to validate that book exists (we should extrapoalte this)
+            # need to validate that book exists (we should extrapoalte this)
+            update_status(connection, username, book_id)
         elif choice == "6":
-            delete_item(connection, "book_user", book_id) # primary key is two values, need delete_item_junction function
+            # primary key is two values, need delete_item_junction function
+            delete_item(connection, "book_user", book_id)
             delete_book_user(connection, username, book_id)
         elif choice == "7":
             break
@@ -318,7 +347,7 @@ def add_book(connection, username, book_id):
     try:
         with connection.cursor() as cursor:
             query = "INSERT INTO book_user (bookId, username) VALUES (%s, '%')"
-            cursor.execute(query, (book_id,username))
+            cursor.execute(query, (book_id, username))
             connection.commit()
             print("Book added successfully")
 
@@ -452,7 +481,6 @@ def user_book_clubs_menu(connection, username):
         elif choice == "3":
             view_column_items(connection, "member", "book_club_members", "club_name", bc_name)
         elif choice == "4":
-            # view_book_club_personal(connection, username) 
             view_column_items(connection, "club_name", "book_club_members", "member", username)
         elif choice == "5":
             join_book_club(connection, username, bc_name)
@@ -511,18 +539,18 @@ def leave_book_club(connection, username, bc_name):
 #         print("2. View a Review")
 #         print("3. Write a Review")
 #         choice = input("Enter your choice: ")
-# 
+#
 #         if choice not in ["1", "4"]:
 #             bc_name = input("Enter Book Club name: ")
-# 
+#
 #         if choice == "1":
 #             view_item(connection, "book_club")
 #         elif choice == "2":
 #             view_item(connection, "book_club", bc_name)
 #         elif choice == "3":
-#             view_book_club_members(connection, bc_name) 
+#             view_book_club_members(connection, bc_name)
 #         elif choice == "4":
-#             view_book_club_personal(connection, username) 
+#             view_book_club_personal(connection, username)
 #         elif choice == "5":
 #             join_book_club(connection, username, bc_name)
 #         elif choice == "6":
@@ -555,10 +583,12 @@ def view_item(connection, entity, item_id=None):
         except Exception as e:
             print("Error occurred while viewing the item:", e)
 
+
 def view_column_items(connection, select_col, entity, id_column, item_id=None):
     try:
         with connection.cursor() as cursor:
-            cursor.callproc('view_column_items_proc', (select_col, entity, id_column, item_id))
+            cursor.callproc('view_column_items_proc',
+                            (select_col, entity, id_column, item_id))
             results = cursor.fetchall()
 
         if results:
@@ -573,7 +603,6 @@ def view_column_items(connection, select_col, entity, id_column, item_id=None):
         print("Error occurred while viewing the item:", e)
 
 
-
 def delete_item(connection, entity, id):
     table_name, id_column = table_mapping.get(entity)
     if table_name and id_column:
@@ -586,6 +615,7 @@ def delete_item(connection, entity, id):
             print("Error occurred while deleting the item:", e)
     else:
         print("Invalid entity or id. Please try again.")
+
 
 def validate_instance_exists(connection, table_name, column_name, value):
     try:

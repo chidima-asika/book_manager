@@ -33,7 +33,7 @@ CREATE TABLE user
 
 CREATE TABLE librarian
 (
-	lib_username VARCHAR(30) PRIMARY KEY,
+	username VARCHAR(30) PRIMARY KEY,
     password VARCHAR(30) NOT NULL,
     first_name VARCHAR(30) NOT NULL,
     last_name VARCHAR(30) NOT NULL
@@ -69,7 +69,7 @@ CREATE TABLE book
 
 	FOREIGN KEY (book_genre) REFERENCES genre (name) ON UPDATE CASCADE ON DELETE CASCADE,
 	FOREIGN KEY (author) REFERENCES author (first_last_name) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (librarian_username) REFERENCES librarian (lib_username) ON UPDATE CASCADE ON DELETE SET NULL
+    FOREIGN KEY (librarian_username) REFERENCES librarian (username) ON UPDATE CASCADE ON DELETE SET NULL
 );
 
 CREATE TABLE reviews
@@ -89,7 +89,7 @@ CREATE TABLE book_club
     num_members INT DEFAULT 0,
 
 	FOREIGN KEY (bookId) REFERENCES book (bookId) ON UPDATE CASCADE ON DELETE SET NULL,
-    FOREIGN KEY (librarian) REFERENCES librarian (lib_username) ON UPDATE CASCADE ON DELETE SET NULL
+    FOREIGN KEY (librarian) REFERENCES librarian (username) ON UPDATE CASCADE ON DELETE SET NULL
 );
 
 CREATE TABLE book_user
@@ -306,8 +306,36 @@ CREATE TABLE user_review_book
 
 -- ---------------------------- STORED PROCEDURES END ----------------------------
 
--- librarian_books_menu
--- librarian_books_menu END
+-- create_users_libs
+
+DELIMITER //
+
+CREATE PROCEDURE create_users_proc(
+    IN username_p VARCHAR(30),
+    IN password_p VARCHAR(30),
+    IN first_name_p VARCHAR(30),
+    IN last_name_p VARCHAR(30),
+    IN user_type_p VARCHAR(30)
+)
+BEGIN
+    DECLARE query VARCHAR(500);
+
+    IF user_type_p = 'librarian' THEN
+        SET @query = CONCAT('INSERT INTO librarian (username, password, first_name, last_name) VALUES (''', username_p, ''', ''', password_p, ''', ''', first_name_p, ''', ''', last_name_p, ''')');
+    ELSE
+        SET @query = CONCAT('INSERT INTO user (username, password, first_name, last_name) VALUES (''', username_p, ''', ''', password_p, ''', ''', first_name_p, ''', ''', last_name_p, ''')');
+    END IF;
+
+    PREPARE stmt FROM @query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+END //
+
+DELIMITER ;
+
+
+-- create_users_lib END
+
 
 -- librarian_bookclub_menu
 -- librarian_bookclub_menu END
@@ -450,7 +478,7 @@ DELIMITER ;
 
 -- ---------------------------------- DATA DUMP ----------------------------------
 
-INSERT INTO librarian (lib_username, password, first_name, last_name) VALUES
+INSERT INTO librarian (username, password, first_name, last_name) VALUES
 ('test_librarian', 'tester123', 'Test', 'Librarian');
 
 INSERT INTO user (username, password, first_name, last_name) VALUES
