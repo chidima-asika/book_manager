@@ -325,7 +325,6 @@ def user_menu(connection, username):
         if choice == "1":
             user_books_menu(connection, username)
         elif choice == "2":
-            break
             user_reviews_menu(connection, username)
         elif choice == "3":
             user_book_clubs_menu(connection, username)
@@ -614,36 +613,6 @@ def leave_book_club(connection, username, bc_name):
 
 # _______________________ unique user_book_clubs_menu FUNCTIONS END _________________________#
 
-
-# =============================================================================
-# def user_reviews_menu(connection, username):
-#     while True:
-#         print("Reviews Menu:")
-#         print("1. View All Reviews")
-#         print("2. View a Review")
-#         print("3. Write a Review")
-#         choice = input("Enter your choice: ")
-#
-#         if choice not in ["1", "4"]:
-#             bc_name = input("Enter Book Club name: ")
-#
-#         if choice == "1":
-#             view_item(connection, "book_club")
-#         elif choice == "2":
-#             view_item(connection, "book_club", bc_name)
-#         elif choice == "3":
-#             view_book_club_members(connection, bc_name)
-#         elif choice == "4":
-#             view_book_club_personal(connection, username)
-#         elif choice == "5":
-#             join_book_club(connection, username, bc_name)
-#         elif choice == "6":
-#             leave_book_club(connection, username, bc_name)
-#         elif choice == "7":
-#             break
-#         else:
-#             print("Invalid choice. Please try again.")
-# =============================================================================
 
 # _______________________ GENERAL FUNCTIONS _________________________#
 
