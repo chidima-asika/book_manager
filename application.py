@@ -151,10 +151,10 @@ def librarian_menu(connection, username):
             print("Invalid choice. Please try again.")
 
 def lib_updates(connection):
-    print("You may update tables: user, book, book_club, author, and genre")
+    print("You may update tables: user, librarian, genre, author, book, reviews, book_club, book_user, book_club_members, user_follows_user, and user_review_book")
     table_name = input("Which table would you like to update?: ")
     
-    if table_name in ("user", "book", "book_club", "author", "genre"):
+    if table_name not in ("librarian"):
         print(f"Columns for {table_name}: ")
         
         try:
