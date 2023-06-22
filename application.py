@@ -30,38 +30,77 @@ table_mapping = {
     "book_user": ("book_user", "username")
 }
 
+# create new user
+# reset password
+# loas genre
+#  test validate theory
+
 def login():
     connection = connect_to_database()
 
     if connection:
-        username = input("Username: ")
-        password = input("Password: ")
+        print("1. Sign In")
+        print("2. Create New Account")
 
-        try:
-            with connection.cursor() as cursor:
-                query = "SELECT * FROM librarian WHERE lib_username = %s AND password = %s"
-                cursor.execute(query, (username, password))
-                librarian = cursor.fetchone()
+        choice = input("Enter your choice: ")
 
-                if librarian:
-                    print("Logged in as librarian")
-                    librarian_menu(connection, username)
-                else:
-                    query = "SELECT * FROM user WHERE username = %s AND password = %s"
+        if choice == "1":
+            username = input("Username: ")
+            password = input("Password: ")
+
+            try:
+                with connection.cursor() as cursor:
+                    query = "SELECT * FROM librarian WHERE lib_username = %s AND password = %s"
                     cursor.execute(query, (username, password))
-                    user = cursor.fetchone()
+                    librarian = cursor.fetchone()
 
-                    if user:
-                        print("Logged in as user")
-                        user_menu(connection, username)
+                    if librarian:
+                        print("Logged in as librarian")
+                        librarian_menu(connection, username)
                     else:
-                        print("Invalid credentials")
+                        query = "SELECT * FROM user WHERE username = %s AND password = %s"
+                        cursor.execute(query, (username, password))
+                        user = cursor.fetchone()
 
-        except Exception as e:
-            print("Error occurred during login:", e)
+                        if user:
+                            print("Logged in as user")
+                            user_menu(connection, username)
+                        else:
+                            print("Invalid credentials")
 
-# do we need to add ability to create an account?
-# for general function, still add a print statement after stating with ID was deleted
+            except Exception as e:
+                print("Error occurred during login:", e)
+
+        elif choice == "2":
+            while True:
+                username = input("Enter a new username: ")
+
+                try:
+                    with connection.cursor() as cursor:
+                        # Check if the username already exists
+                        query = "SELECT * FROM user WHERE username = %s"
+                        cursor.execute(query, (username,))
+                        existing_user = cursor.fetchone()
+
+                        if existing_user:
+                            print("Username already exists. Please choose a different username.")
+                        else:
+                            # Insert the new user into the user table
+                            password = input("Enter a new password: ")
+                            query = "INSERT INTO user (username, password) VALUES (%s, %s)"
+                            cursor.execute(query, (username, password))
+                            connection.commit()
+                            print("New account created successfully")
+                            break  # Break out of the loop when the account is created
+
+                except Exception as e:
+                    print("Error occurred while creating a new account:", e)
+
+
+        else:
+            print("Invalid choice")
+
+
 
 def librarian_menu(connection, username):
     while True:
