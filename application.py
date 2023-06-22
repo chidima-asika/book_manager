@@ -172,9 +172,7 @@ def librarian_book_clubs_menu(connection, username):
         elif choice == "3":
             view_item(connection, "book_club")
         elif choice == "4":
-            # view_book_club_members(connection, bc_name)
-            view_column_items(connection, "member", "book_club_members", bc_name, "club_name")
-
+            view_column_items(connection, "member", "book_club_members", "club_name", bc_name)
         elif choice == "5":
             delete_item(connection, "book_club", bc_name)
         elif choice == "6":
@@ -207,23 +205,6 @@ def create_book_club(connection, librarian_username):
     except Exception as e:
         print("Error occurred while creating the Book Club:", e)
 
-
-def view_book_club_members(connection, club_name):
-    try:
-        with connection.cursor() as cursor:
-            query = "SELECT member FROM book_club_members WHERE club_name = %s"
-            cursor.execute(query, (club_name,))
-            members = cursor.fetchall()
-
-            if members:
-                print("Book Club Members:")
-                for member in members:
-                    print(member["member"])
-            else:
-                print(f"No members found for the Book Club: {club_name}")
-
-    except Exception as e:
-        print("Error occurred while fetching book club members:", e)
 
 # _______________________ unique librarian_book_clubs_menu FUNCTIONS END _________________________#
 
@@ -430,7 +411,7 @@ def user_book_clubs_menu(connection, username):
         elif choice == "2":
             view_item(connection, "book_club", bc_name)
         elif choice == "3":
-            view_book_club_members(connection, bc_name) 
+            view_column_items(connection, "member", "book_club_members", "club_name", bc_name)
         elif choice == "4":
             view_book_club_personal(connection, username) 
         elif choice == "5":
