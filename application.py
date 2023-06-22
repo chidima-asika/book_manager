@@ -138,9 +138,9 @@ def librarian_menu(connection, username):
         elif choice == "2":
             librarian_book_clubs_menu(connection, username)
         elif choice == "3":
-            authors_menu(connection, username)
+            authors_menu(connection)
         elif choice == "4":
-            genres_menu(connection, username)
+            genres_menu(connection)
         elif choice == "5":
             print("Logged out")
             break
@@ -293,9 +293,9 @@ def user_menu(connection, username):
         elif choice == "3":
             user_book_clubs_menu(connection, username)
         elif choice == "4":
-            authors_menu(connection, username)
+            authors_menu(connection)
         elif choice == "5":
-            genres_menu(connection, username)
+            genres_menu(connection)
         elif choice == "6":
             print("Logged out")
             break
@@ -563,6 +563,41 @@ def leave_book_club(connection, username, bc_name):
 
 # _______________________ GENERAL FUNCTIONS _________________________#
 
+def authors_menu(connection):
+    while True:
+        print("Authors Menu:")
+        print("1. View an Author")
+        print("2. View All Authors")
+        print("3. Go Back")
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            author_name = input("Enter the author's name: ")
+            view_item(connection, "author", author_name)
+        elif choice == "2":
+            view_item(connection, "author")
+        elif choice == "3":
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+def genres_menu(connection):
+    while True:
+        print("Genres Menu:")
+        print("1. View a Genre")
+        print("2. View All Genres")
+        print("3. Go Back")
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            genre_name = input("Enter the genre name: ")
+            view_item(connection, "genre", genre_name)
+        elif choice == "2":
+            view_item(connection, "genre")
+        elif choice == "3":
+            break
+        else:
+            print("Invalid choice. Please try again.")
 
 def view_item(connection, entity, item_id=None):
     table_name, id_column = table_mapping.get(entity)
