@@ -670,10 +670,10 @@ def other_users_menu(connection, username):
         print("1. View All Users")
         print("2. View Users You Follow")
         print("3. View Users Who Follow You")
-        print("4. View Number of Followers and Number Following")
-        print("5. Follow a User")
-        print("6. Unfollow a User")
-        print("7. Go Back")
+        print("4. View Number of Users You Follow")
+        print("5. View Number of Followers")
+        print("7. Unfollow a User")
+        print("8. Go Back")
         choice = input("Enter your choice: ")
 
         if choice in ["5", "6"]:
@@ -694,14 +694,14 @@ def other_users_menu(connection, username):
         elif choice == "3":
             view_column_items(connection, "username", "user_follows_user", "following_username", item_id=username)
         elif choice == "4":
-            view_item(connection, "user", username)
-            # will return the whole row?
-            # should not return password 
+            view_column_items(connection, "num_folowing", "user", "username", item_id=username)
         elif choice == "5":
-            follow_user(connection, username, second_username)
+            view_column_items(connection, "num_followers", "user", "username", item_id=username)
         elif choice == "6":
-            unfollow_user(connection, username, second_username)
+            follow_user(connection, username, second_username)
         elif choice == "7":
+            unfollow_user(connection, username, second_username)
+        elif choice == "8":
             break
         else:
             print("Invalid choice. Please try again.")
