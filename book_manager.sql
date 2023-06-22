@@ -281,7 +281,7 @@ CREATE TABLE user_review_book
 --     WHERE club_name = OLD.club_name;
 -- END //
 
-DELIMITER ;
+-- DELIMITER ;
 
 -- ------------------------------TRIGGERRS END --------------------------------
 
