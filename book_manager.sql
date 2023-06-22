@@ -65,8 +65,8 @@ CREATE TABLE book
     author VARCHAR(100) NOT NULL,
     book_genre VARCHAR(100) NOT NULL,
     librarian_username VARCHAR(30),
-    
 
+    UNIQUE(title,author),
 	FOREIGN KEY (book_genre) REFERENCES genre (name) ON UPDATE CASCADE ON DELETE CASCADE,
 	FOREIGN KEY (author) REFERENCES author (first_last_name) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (librarian_username) REFERENCES librarian (username) ON UPDATE CASCADE ON DELETE SET NULL
@@ -423,7 +423,7 @@ CREATE PROCEDURE view_item_proc(IN entity VARCHAR(100), IN item_id VARCHAR(100),
 BEGIN
     SET @query = CONCAT('SELECT * FROM ', entity);
     IF item_id IS NOT NULL THEN
-        SET @query = CONCAT(@query, ' WHERE ',id_column, ' = ', item_id);
+        SET @query = CONCAT(@query, ' WHERE ',id_column, ' = "', item_id, '"');
     END IF;
     PREPARE stmt FROM @query;
     EXECUTE stmt;
@@ -473,8 +473,6 @@ BEGIN
 END //
 
 DELIMITER ;
-
-
 
 -- ---------------------------------- DATA DUMP ----------------------------------
 
