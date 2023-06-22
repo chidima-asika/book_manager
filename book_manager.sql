@@ -6,6 +6,7 @@ USE BookManager;
 -- need to add PK some of these have non
 -- Need to add deletion contraints depending on the entity 
 -- need to add ability to create users
+-- remove active column from book club
 
 
 DROP TABLE IF EXISTS user;
@@ -314,8 +315,25 @@ CREATE TABLE user_review_book
 -- librarian_books_menu
 -- librarian_books_menu END
 
--- librarian_books_menu
--- librarian_books_menu END
+-- librarian_bookclub_menu
+DELIMITER //
+
+CREATE PROCEDURE create_book_club_proc(
+    IN club_name VARCHAR(100),
+    IN book_id VARCHAR(100),
+    IN librarian_username VARCHAR(30)
+)
+BEGIN
+    -- Insert the Book Club
+    INSERT INTO book_club (club_name, bookId, librarian)
+    VALUES (club_name, book_id, librarian_username);
+
+    SELECT 'Book Club created successfully' AS message;
+END //
+
+DELIMITER ;
+
+-- librarian_bookclub_menu END
 
 -- endn_bookclub_menu
 DELIMITER //

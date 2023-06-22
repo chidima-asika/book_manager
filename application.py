@@ -188,7 +188,7 @@ def create_book_club(connection, librarian_username):
 
     try:
         with connection.cursor() as cursor:
-
+            # Perform validation using the validate_instance_exists function
             if validate_instance_exists(connection, 'book_club', 'club_name', club_name):
                 print("Book Club already exists")
             else:
@@ -196,10 +196,12 @@ def create_book_club(connection, librarian_username):
                     print("Book does not exist")
                     return
 
-                query = "INSERT INTO book_club (club_name, bookId, librarian) VALUES (%s, %s, %s)"
-                cursor.execute(query, (club_name, book_id, librarian_username))
-                connection.commit()
-                print("Book Club created successfully")
+                # Call the stored procedure
+                cursor.callproc('create_book_club_proc', (club_name, book_id, librarian_username))
+                result = cursor.fetchone()
+
+                if result:
+                    print(result["message"])
     except Exception as e:
         print("Error occurred while creating the Book Club:", e)
 
