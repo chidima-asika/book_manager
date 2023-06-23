@@ -66,7 +66,7 @@ CREATE TABLE book
     num_reviews INT DEFAULT 0,
     ave_rating DECIMAL(3, 2) DEFAULT NULL,
     
-
+    UNIQUE(title,author),
 	FOREIGN KEY (book_genre) REFERENCES genre (name) ON UPDATE CASCADE ON DELETE CASCADE,
 	FOREIGN KEY (author) REFERENCES author (first_last_name) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (librarian_username) REFERENCES librarian (username) ON UPDATE CASCADE ON DELETE SET NULL
@@ -542,7 +542,7 @@ CREATE PROCEDURE view_item_proc(IN entity VARCHAR(100), IN id_column VARCHAR(100
 BEGIN
     SET @query = CONCAT('SELECT * FROM ', entity);
     IF item_id IS NOT NULL THEN
-        SET @query = CONCAT(@query, ' WHERE ',id_column, ' = ', item_id);
+        SET @query = CONCAT(@query, ' WHERE ',id_column, ' = "', item_id, '"');
     END IF;
     PREPARE stmt FROM @query;
     EXECUTE stmt;
@@ -592,6 +592,21 @@ BEGIN
 END //
 DELIMITER ;
 
+DELIMITER //
+CREATE PROCEDURE update_items_proc(
+    IN table_name VARCHAR(100),
+    IN column_name VARCHAR(100),
+    IN new_value VARCHAR(100),
+    IN where_column VARCHAR(100),
+    IN where_value VARCHAR(100)
+)
+BEGIN
+    SET @query = CONCAT('UPDATE ', table_name, ' SET ', column_name, ' = "', new_value, '" WHERE ', where_column, ' = "', where_value, '"');
+    PREPARE stmt FROM @query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+END //
+DELIMITER ;
 
 DELIMITER //
 

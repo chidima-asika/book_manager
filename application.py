@@ -47,9 +47,9 @@ def check_existing_user(connection, username):
 def create_user(connection, user_type):
     
     if user_type == "librarian":
-        secret_passphase = input(
-                "If you really want to become a librarian, answer this: What powers the words?")
-        if secret_passphase in ("Books", "books"):
+        secret_passphrase = input(
+                "If you really want to become a librarian, answer this: What powers the world?")
+        if secret_passphrase in ("Books", "books"):
             pass
         else:
             print("Incorrect!")
@@ -133,7 +133,8 @@ def librarian_menu(connection, username):
         print("2. Book Clubs")
         print("3. Authors")
         print("4. Genres")
-        print("5. Logout")
+        print("5. Update Existing Value In Table")
+        print("6. Logout")
         choice = input("Enter your choice: ")
 
         if choice == "1":
@@ -143,12 +144,45 @@ def librarian_menu(connection, username):
         elif choice == "3":
             librarian_author_menu(connection, username)
         elif choice == "4":
-            librarian_genre_menu(connection, username)
+            genres_menu(connection)
         elif choice == "5":
+            lib_updates(connection)
+        elif choice == "6":
             print("Logged out")
             break
         else:
             print("Invalid choice. Please try again.")
+
+def lib_updates(connection):
+    print("You may update tables: user, librarian, genre, author, book, reviews, book_club, book_user, book_club_members, user_follows_user, and user_review_book")
+    table_name = input("Which table would you like to update?: ")
+    
+    if table_name not in ("librarian"):
+        print(f"Columns for {table_name}: ")
+        
+        try:
+            with connection.cursor() as cursor:
+                query = f"SHOW COLUMNS FROM {table_name}"
+                cursor.execute(query)
+                result = cursor.fetchall()
+                table_column_names = [row['Field'] for row in result]
+                print(table_column_names)
+        except Exception as e:
+            print("Error occurred while retrieving column names:", e)
+            return
+        
+        column_name = input("Which column would you like to update?: ")
+        where_column = input("Which column would you like to set as the condition?: ")
+        where_value = input("What is the value of the condition column?: ")
+        new_value = input("What is the new value for the selected column?: ")
+        
+        if validate_instance_exists(connection, table_name, where_column, where_value):
+            update_value(connection, table_name, column_name, new_value, where_column, where_value)
+            print("Update successful.")
+        else:
+            print("The specified instance does not exist in the table.")
+    else:
+        print("Invalid table name.")
 
 
 def librarian_books_menu(connection, username):
@@ -312,49 +346,6 @@ def create_author(connection):
 # _______________________ unique librarian_author_menu FUNCTIONS END _________________________#
 
 
-def librarian_genre_menu(connection):
-    while True:
-        print("Genres Menu:")
-        print("1. View a Genre")
-        print("2. View All Genres")
-        print("3. Add New Genre")
-        print("4. Go Back")
-        choice = input("Enter your choice: ")
-
-        if choice == "1":
-            genre_name = input("Enter the genre name: ")
-            view_item(connection, "genre", genre_name)
-        elif choice == "2":
-            view_item(connection, "genre")
-        elif choice == "3":
-            create_genre(connection)
-        elif choice == "4":
-            break
-        else:
-            print("Invalid choice. Please try again.")
-
-# _______________________ unique librarian_genre_menu FUNCTIONS  _________________________#
-
-def create_genre(connection):
-    try:
-        with connection.cursor() as cursor:
-            genre_name = input("Enter the genre name: ")
-
-            if validate_instance_exists(connection, 'genre', 'name', genre_name):
-                print("Genre already exists in the database.")
-                return
-
-            description = input("Enter the genre description: ")
-
-            cursor.callproc('create_genre', (genre_name, description))
-            connection.commit()
-            print("Genre created successfully")
-
-    except Exception as e:
-        print("Error occurred while creating the genre:", e)
-
-
-# _______________________ unique librarian_genre_menu FUNCTIONS END _________________________#
 
 ## ________________________ LIBRARIAN FUNCTIOANLITY END ________________________ ##
 
@@ -370,6 +361,7 @@ def user_menu(connection, username):
         print("4. Authors")
         print("5. Genres")
         print("6. Users")
+        print("7. Change Password")
         print("7. Logout")
         choice = input("Enter your choice: ")
 
@@ -382,10 +374,13 @@ def user_menu(connection, username):
         elif choice == "4":
             user_author_menu(connection, username)
         elif choice == "5":
-            user_genre_menu(connection, username)
+            genres_menu(connection)
         elif choice == "6":
             other_users_menu(connection, username)
         elif choice == "7":
+            new_value = input("What would you like to change you password to?:")
+            update_value(connection, "users", "password", new_value, "username", username)
+        elif choice == "8":
             print("Logged out")
             break
         else:
@@ -406,7 +401,6 @@ def user_books_menu(connection, username):
 
         if choice not in ["1", "4"]:
             book_id = input("Enter book id: ")
-
         if choice == "1":
             view_item(connection, "book")
         elif choice == "2":
@@ -516,25 +510,6 @@ def user_author_menu(connection, username):
         else:
             print("Invalid choice. Please try again.")
             
-            
-def user_genre_menu(connection):
-    while True:
-        print("Genres Menu:")
-        print("1. View a Genre")
-        print("2. View All Genres")
-        print("3. Go Back")
-        choice = input("Enter your choice: ")
-
-        if choice == "1":
-            genre_name = input("Enter the genre name: ")
-            view_item(connection, "genre", genre_name)
-        elif choice == "2":
-            view_item(connection, "genre")
-        elif choice == "3":
-            break
-        else:
-            print("Invalid choice. Please try again.")
-
 
 def user_reviews_menu(connection, username):
     while True:
@@ -733,6 +708,50 @@ def unfollow_user(connection, username, second_username):
 
 # _______________________ GENERAL FUNCTIONS _________________________#
 
+def update_value(connection, table_name, column_name, new_value, where_column, where_value):
+    try:
+        with connection.cursor() as cursor:
+            cursor.callproc('update_items_proc', (table_name, column_name, new_value, where_column, where_value))
+            connection.commit()
+            print("Value updated successfully")
+    except Exception as e:
+        print("Error occurred while updating value:", e)
+
+def authors_menu(connection):
+    while True:
+        print("Authors Menu:")
+        print("1. View an Author")
+        print("2. View All Authors")
+        print("3. Go Back")
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            author_name = input("Enter the author's name: ")
+            view_item(connection, "author", author_name)
+        elif choice == "2":
+            view_item(connection, "author")
+        elif choice == "3":
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+def genres_menu(connection):
+    while True:
+        print("Genres Menu:")
+        print("1. View a Genre")
+        print("2. View All Genres")
+        print("3. Go Back")
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            genre_name = input("Enter the genre name: ")
+            view_item(connection, "genre", genre_name)
+        elif choice == "2":
+            view_item(connection, "genre")
+        elif choice == "3":
+            break
+        else:
+            print("Invalid choice. Please try again.")
 
 def view_item(connection, entity, item_id=None):
     table_name, id_column = table_mapping.get(entity)
@@ -785,7 +804,6 @@ def delete_item(connection, entity, id):
             print("Error occurred while deleting the item:", e)
     else:
         print("Invalid entity or id. Please try again.")
-# need to add validation that the entity exists
 
 
 def validate_instance_exists(connection, table_name, column_name, value):
@@ -817,3 +835,4 @@ def delete_item_junction(connection, table_name, key1_name, key1_value, key2_nam
 # _______________________ GENERAL FUNCTIONS END _________________________#
 
 login()
+
