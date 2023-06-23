@@ -668,13 +668,13 @@ INSERT INTO user_review_book (bookId, username, reviewId) VALUES
 
 -- for testing ONLY
 
-SELECT username FROM user;
+SELECT username FROM user
 UNION
 SELECT username FROM librarian;
 
 
-select * from book where bookId = 1;
+select * from book where bookId = 4;
 
 
-SELECT * FROM book_club;
+SELECT * FROM book_club_members where username = "test_user";
 
