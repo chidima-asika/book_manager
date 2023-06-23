@@ -35,7 +35,6 @@ table_mapping = {
 
 def check_existing_user(connection, username):
     with connection.cursor() as cursor:
-        # Check if the username already exists in both user and librarian tables
         query = "SELECT username FROM user WHERE username = %s UNION SELECT username FROM librarian WHERE username = %s"
         cursor.execute(query, (username, username))
         existing_user = cursor.fetchone()
@@ -288,7 +287,6 @@ def create_book_club(connection, librarian_username):
 
     try:
         with connection.cursor() as cursor:
-            # Perform validation using the validate_instance_exists function
             if validate_instance_exists(connection, 'book_club', 'club_name', club_name):
                 print("Book Club already exists")
             else:
@@ -296,7 +294,6 @@ def create_book_club(connection, librarian_username):
                     print("Book does not exist")
                     return
 
-                # Call the stored procedure
                 cursor.callproc('create_book_club_proc',
                                 (club_name, book_id, librarian_username))
                 result = cursor.fetchone()
@@ -368,7 +365,7 @@ def user_menu(connection, username):
         print("5. Genres")
         print("6. Users")
         print("7. Change Password")
-        print("7. Logout")
+        print("8. Logout")
         choice = input("Enter your choice: ")
 
         if choice == "1":
@@ -413,12 +410,10 @@ def user_books_menu(connection, username):
             view_item(connection, "book", book_id)
         elif choice == "3":
             add_book(connection, username, book_id)
-            # these can be one function b/c one error should stop function
             update_status(connection, username, book_id)
         elif choice == "4":
             view_item(connection, "book_user", username)
         elif choice == "5":
-            # need to validate that book exists (we should extrapoalte this)
             update_status(connection, username, book_id)
         elif choice == "6":
             break
@@ -439,8 +434,6 @@ def add_book(connection, username, book_id):
     except Exception as e:
         print("Error occurred while adding the book:", e)
 
-
-# Call the login function to start the login process
 def update_status(connection, username, book_id):
     try:
         with connection.cursor() as cursor:
@@ -592,10 +585,7 @@ def user_book_clubs_menu(connection, username):
 def join_book_club(connection, username, bc_name):
     try:
         with connection.cursor() as cursor:
-            # Call the stored procedure
             cursor.callproc('join_book_club_proc', (username, bc_name))
-
-            # Fetch the result message
             result = cursor.fetchone()
 
             if result:
@@ -609,10 +599,8 @@ def join_book_club(connection, username, bc_name):
 def leave_book_club(connection, username, bc_name):
     try:
         with connection.cursor() as cursor:
-            # Call the stored procedure
             cursor.callproc('leave_book_club_proc', (username, bc_name))
 
-            # Fetch the result message
             result = cursor.fetchone()
 
             if result:
@@ -811,4 +799,3 @@ def validate_instance_exists(connection, table_name, column_name, value):
 # _______________________ GENERAL FUNCTIONS END _________________________#
 
 login()
-hi

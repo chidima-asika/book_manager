@@ -665,6 +665,5 @@ INSERT INTO user_review_book (bookId, username, reviewId) VALUES
 (4, 'jane_doe_22', 4),
 (1, 'jane_doe_22', 5);
 
--------------------------------- DATA DUMP END --------------------------------
 
 
