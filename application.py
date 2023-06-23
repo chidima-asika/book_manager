@@ -26,10 +26,10 @@ table_mapping = {
     "book": ("book", "bookId"),
     "review": ("reviews", "reviewId"),
     "book_club": ("book_club", "club_name"),
-    # "book_club_members": ("book_club_members", "member"),
     "author": ("author", "first_last_name"),
     "genre": ("genre", "name"),
-    "book_user": ("book_user", "username")
+    "book_user": ("book_user", "username"),
+    "user": ("user", "username")
 }
 
 
@@ -122,6 +122,8 @@ def login():
         else:
             print("Invalid choice")
 
+## ________________________ LIBRARIAN FUNCTIOANLITY  ________________________ ##
+
 
 def librarian_menu(connection, username):
     while True:
@@ -131,7 +133,7 @@ def librarian_menu(connection, username):
         print("3. Authors")
         print("4. Genres")
         print("5. Update Existing Value In Table")
-        print("5. Logout")
+        print("6. Logout")
         choice = input("Enter your choice: ")
 
         if choice == "1":
@@ -139,7 +141,7 @@ def librarian_menu(connection, username):
         elif choice == "2":
             librarian_book_clubs_menu(connection, username)
         elif choice == "3":
-            authors_menu(connection)
+            librarian_author_menu(connection, username)
         elif choice == "4":
             genres_menu(connection)
         elif choice == "5":
@@ -308,6 +310,54 @@ def create_book_club(connection, librarian_username):
 # _______________________ unique librarian_book_clubs_menu FUNCTIONS END _________________________#
 
 
+def librarian_author_menu(connection, username):
+    while True:
+        print("Authors Menu:")
+        print("1. View an Author")
+        print("2. View All Authors")
+        print("3. Add New Author")
+        print("4. Go Back")
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            author_name = input("Enter the author's name: ")
+            view_item(connection, "author", author_name)
+        elif choice == "2":
+            view_item(connection, "author")
+        elif choice == "3":
+            create_author(connection)
+        elif choice == "4":
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+# _______________________ unique librarian_author_menu FUNCTIONS  _________________________#
+
+def create_author(connection):
+    try:
+        with connection.cursor() as cursor:
+            author_name = input("Enter the author's full name: ")
+
+            if validate_instance_exists(connection, 'author', 'first_last_name', author_name):
+                print("Author already exists in the database.")
+                return
+
+            cursor.callproc('create_author', (author_name,))
+            connection.commit()
+            print("Author created successfully")
+
+    except Exception as e:
+        print("Error occurred while creating the author:", e)
+
+# _______________________ unique librarian_author_menu FUNCTIONS END _________________________#
+
+
+
+## ________________________ LIBRARIAN FUNCTIOANLITY END ________________________ ##
+
+## ____________________________ USER FUNCTIOANLITY ____________________________ ##
+
+
 def user_menu(connection, username):
     while True:
         print("Menu:")
@@ -316,25 +366,27 @@ def user_menu(connection, username):
         print("3. Book Clubs")
         print("4. Authors")
         print("5. Genres")
-        print("6. Change Password")
+        print("6. Users")
+        print("7. Change Password")
         print("7. Logout")
         choice = input("Enter your choice: ")
 
         if choice == "1":
             user_books_menu(connection, username)
         elif choice == "2":
-            break
             user_reviews_menu(connection, username)
         elif choice == "3":
             user_book_clubs_menu(connection, username)
         elif choice == "4":
-            authors_menu(connection)
+            user_author_menu(connection, username)
         elif choice == "5":
             genres_menu(connection)
         elif choice == "6":
-            new_value = input("WHat would you like to change you password to?:")
-            update_value(connection, "users", "password", new_value, "username", username)
+            other_users_menu(connection, username)
         elif choice == "7":
+            new_value = input("What would you like to change you password to?:")
+            update_value(connection, "user", "password", new_value, "username", username)
+        elif choice == "8":
             print("Logged out")
             break
         else:
@@ -349,8 +401,7 @@ def user_books_menu(connection, username):
         print("3. Add a Book")
         print("4. View your Books")
         print("5. Update Status of your Book")
-        print("6. Delete a book from your Books")
-        print("7. Go Back")
+        print("6. Go Back")
         choice = input("Enter your choice: ")
 
         if choice not in ["1", "4"]:
@@ -365,15 +416,11 @@ def user_books_menu(connection, username):
             # these can be one function b/c one error should stop function
             update_status(connection, username, book_id)
         elif choice == "4":
-            view_item(connection, "book_user", username)  # this is wrong
+            view_item(connection, "book_user", username)
         elif choice == "5":
             # need to validate that book exists (we should extrapoalte this)
             update_status(connection, username, book_id)
         elif choice == "6":
-            # primary key is two values, need delete_item_junction function
-            delete_item(connection, "book_user", book_id)
-            delete_book_user(connection, username, book_id)
-        elif choice == "7":
             break
         else:
             print("Invalid choice. Please try again.")
@@ -391,26 +438,6 @@ def add_book(connection, username, book_id):
 
     except Exception as e:
         print("Error occurred while adding the book:", e)
-
-
-def view_book_user(connection, username):
-    try:
-        with connection.cursor() as cursor:
-            query = "SELECT * FROM book_user WHERE username = %s"
-            cursor.execute(query, (username,))
-            books = cursor.fetchall()
-
-            if books:
-                print("Your Books:")
-                for book in books:
-                    print("Book ID:", book["bookId"])
-                    print("Status:", book["status"])
-                    print("-----")
-            else:
-                print(f"No books found for {username}")
-
-    except Exception as e:
-        print("Error occurred while fetching user books:", e)
 
 
 # Call the login function to start the login process
@@ -434,8 +461,7 @@ def update_status(connection, username, book_id):
                 print("Invalid choice. Please try again.")
                 return
 
-            query = "UPDATE book_user SET status = %s WHERE username = %s AND bookId = %s"
-            cursor.execute(query, (status, username, book_id))
+            cursor.callproc('update_status', (status, username, book_id))
             connection.commit()
 
             if cursor.rowcount > 0:
@@ -460,40 +486,71 @@ def delete_book_user(connection, username, book_id):
 
 # _______________________ unique user_books_menu FUNCTIONS END _________________________#
 
+
+def user_author_menu(connection, username):
+    while True:
+        print("Authors Menu:")
+        print("1. View an Author")
+        print("2. View All Authors")
+        print("3. Go Back")
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            author_name = input("Enter the author's name: ")
+            view_item(connection, "author", author_name)
+        elif choice == "2":
+            view_item(connection, "author")
+        elif choice == "3":
+            break
+        else:
+            print("Invalid choice. Please try again.")
+            
+
 def user_reviews_menu(connection, username):
     while True:
         print("Reviews Menu:")
         print("1. Write a Review for a Book")
-        print("2. View All Reviews")
-        print("3. View a Review")
-        print("4. Update a Review")
-        print("5. Delete a Review")
-        print("6. Go Back")
+        print("2. Update a Review Rating")
+        print("3. Go Back")
         choice = input("Enter your choice: ")
 
-        if choice not in ["2"]:
-            book_id = input("Enter Book ID: ")
 
         if choice == "1":
-            write_review(connection, username, book_id)
+            book_id = input("Enter Book ID: ")
+            create_review(connection, username, book_id)
         elif choice == "2":
-            view_item(connection, "reviews")
-            view_all_reviews(connection)
+            new_value = input ("What is the new rating: ")
+            where_value = input("Enter Review ID: ")
+            update_value(connection, "reviews", "rating", new_value, "reviewId", where_value)
         elif choice == "3":
-            view_reviews_with_condition(connection)
-        elif choice == "4":
-            review_id = input("Enter the Review ID: ")
-            update_review(connection, username, review_id)
-        elif choice == "5":
-            book_id = input("Enter the Book ID: ")
-            delete_review(connection, username, book_id)
-        elif choice == "6":
             break
         else:
             print("Invalid choice. Please try again.")
 
-    # stopped here
 
+# _______________________ unique user_reviews_menu FUNCTIONS  _________________________#
+
+def create_review(connection, username, book_id):
+    try:
+        with connection.cursor() as cursor:
+            while True:
+                rating = int(input("Enter a rating (1-5): "))
+                if rating < 1 or rating > 5:
+                    print("Invalid rating. Please enter a number between 1 and 5.")
+                else:
+                    break
+
+            description = input("Enter a description for the review: ")
+
+            cursor.callproc('create_review', (rating, description, book_id, username))
+            connection.commit()
+
+            print("Review added successfully")
+
+    except Exception as e:
+        print("Error occurred while writing the review:", e)
+
+# _______________________ unique user_reviews_menu FUNCTIONS END _________________________#
 
 # _______________________ unique user_books_menu FUNCTIONS END _________________________#
 
@@ -568,36 +625,75 @@ def leave_book_club(connection, username, bc_name):
 
 # _______________________ unique user_book_clubs_menu FUNCTIONS END _________________________#
 
+def other_users_menu(connection, username):
+    while True:
+        print("Other Users Menu:")
+        print("1. View All Users")
+        print("2. View Users You Follow")
+        print("3. View Users Who Follow You")
+        print("4. View Number of Users You Follow")
+        print("5. View Number of Followers")
+        print("6. Follow a User")
+        print("7. Unfollow a User")
+        print("8. Go Back")
+        choice = input("Enter your choice: ")
 
-# =============================================================================
-# def user_reviews_menu(connection, username):
-#     while True:
-#         print("Reviews Menu:")
-#         print("1. View All Reviews")
-#         print("2. View a Review")
-#         print("3. Write a Review")
-#         choice = input("Enter your choice: ")
-#
-#         if choice not in ["1", "4"]:
-#             bc_name = input("Enter Book Club name: ")
-#
-#         if choice == "1":
-#             view_item(connection, "book_club")
-#         elif choice == "2":
-#             view_item(connection, "book_club", bc_name)
-#         elif choice == "3":
-#             view_book_club_members(connection, bc_name)
-#         elif choice == "4":
-#             view_book_club_personal(connection, username)
-#         elif choice == "5":
-#             join_book_club(connection, username, bc_name)
-#         elif choice == "6":
-#             leave_book_club(connection, username, bc_name)
-#         elif choice == "7":
-#             break
-#         else:
-#             print("Invalid choice. Please try again.")
-# =============================================================================
+        if choice in ["5", "6"]:
+            second_username = input("Enter the user's username: ")
+
+            if second_username == username:
+                print("Cannot enter your own username. Please try again.")
+                return
+
+            if not validate_instance_exists(connection, 'user', 'username', second_username):
+                print("User does not exist. Please try again.")
+                return
+
+        if choice == "1":
+            view_item(connection, "user")
+        elif choice == "2":
+            view_column_items(connection, "following_username", "user_follows_user", "username", username)
+        elif choice == "3":
+            view_column_items(connection, "username", "user_follows_user", "following_username", username)
+        elif choice == "4":
+            view_column_items(connection, "num_following", "user", "username", username)
+        elif choice == "5":
+            view_column_items(connection, "num_followers", "user", "username", username)
+        elif choice == "6":
+            follow_user(connection, username, second_username)
+        elif choice == "7":
+            unfollow_user(connection, username, second_username)
+        elif choice == "8":
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+#_____________________  unique other_users_menu FUNCTIONS _____________________# 
+
+def follow_user(connection, username, second_username):
+    try:
+        with connection.cursor() as cursor:
+            cursor.callproc('follow_user_proc', (username, second_username))
+            connection.commit()
+            print(f"You are now following {second_username}")
+    except Exception as e:
+        print("Error occurred while following the user:", e)
+        
+        
+def unfollow_user(connection, username, second_username):
+    try:
+        with connection.cursor() as cursor:
+            cursor.callproc('unfollow_user_proc', (username, second_username))
+            connection.commit()
+            print(f"You have unfollowed {second_username}")
+    except Exception as e:
+        print("Error occurred while unfollowing the user:", e)
+
+#_____________________  unique other_users_menu FUNCTIONS END _____________________# 
+
+
+## __________________________ USER FUNCTIOANLITY END __________________________ ##
+
 
 # _______________________ GENERAL FUNCTIONS _________________________#
 
@@ -711,8 +807,8 @@ def validate_instance_exists(connection, table_name, column_name, value):
         return False
 
 
+
 # _______________________ GENERAL FUNCTIONS END _________________________#
 
 login()
-
-# this is a comment
+hi

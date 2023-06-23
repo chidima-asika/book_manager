@@ -343,6 +343,24 @@ DELIMITER ;
 -- librarian_books_menu
 -- librarian_books_menu END
 
+-- librarian_author_menu
+
+DELIMITER //
+CREATE PROCEDURE create_author(
+    IN p_author_name VARCHAR(100)
+)
+BEGIN
+    INSERT INTO author (first_last_name)
+    VALUES (p_author_name);
+END //
+DELIMITER ;
+
+
+-- librarian_author_menu END
+
+
+
+
 -- librarian_bookclub_menu
 DELIMITER //
 
@@ -419,7 +437,89 @@ DELIMITER ;
 -- end_bookclub_menu END
 
 DELIMITER //
-CREATE PROCEDURE view_item_proc(IN entity VARCHAR(100), IN item_id VARCHAR(100), IN id_column VARCHAR(100))
+
+CREATE PROCEDURE update_status(
+    IN p_status VARCHAR(20),
+    IN p_username VARCHAR(30),
+    IN p_book_id INT
+)
+BEGIN
+    UPDATE book_user
+    SET status = p_status
+    WHERE username = p_username AND bookId = p_book_id;
+END//
+
+DELIMITER ;
+
+-- user_book_menu END
+
+-- user_review_menu
+
+DELIMITER //
+
+CREATE PROCEDURE create_review(
+    IN p_rating INT,
+    IN p_description TEXT,
+    IN p_book_id INT,
+    IN p_username VARCHAR(30)
+)
+BEGIN
+    DECLARE review_id INT;
+
+    INSERT INTO reviews (rating, description)
+    VALUES (p_rating, p_description);
+
+    SET review_id = LAST_INSERT_ID();
+
+    INSERT INTO user_review_book (bookId, username, reviewId)
+    VALUES (p_book_id, p_username, review_id);
+END//
+
+DELIMITER ;
+
+
+-- user_review_menu END
+
+-- other_users_menu
+
+DELIMITER //
+
+CREATE PROCEDURE follow_user_proc(
+    IN p_username VARCHAR(30),
+    IN p_second_username VARCHAR(30)
+)
+BEGIN
+    SET @query = CONCAT('INSERT INTO user_follows_user (username, following_username) VALUES ("', p_username, '", "', p_second_username, '");');
+    PREPARE statement FROM @query;
+    EXECUTE statement;
+    DEALLOCATE PREPARE statement;
+END //
+
+DELIMITER ;
+
+
+DELIMITER //
+
+CREATE PROCEDURE unfollow_user_proc(
+    IN p_username VARCHAR(30),
+    IN p_second_username VARCHAR(30)
+)
+BEGIN
+    SET @query = CONCAT('DELETE FROM user_follows_user WHERE username = "', p_username, '" AND following_username = "', p_second_username, '";');
+    PREPARE statement FROM @query;
+    EXECUTE statement;
+    DEALLOCATE PREPARE statement;
+END //
+
+DELIMITER ;
+
+
+-- other_user_menu END
+
+-- general procedures
+
+DELIMITER //
+CREATE PROCEDURE view_item_proc(IN entity VARCHAR(100), IN id_column VARCHAR(100), IN item_id VARCHAR(100))
 BEGIN
     SET @query = CONCAT('SELECT * FROM ', entity);
     IF item_id IS NOT NULL THEN
@@ -490,6 +590,12 @@ BEGIN
 END //
 DELIMITER ;
 
+DELIMITER //
+
+
+
+
+
 
 -- ---------------------------------- DATA DUMP ----------------------------------
 
@@ -507,9 +613,16 @@ INSERT INTO author (first_last_name) VALUES
 ('J.K. Rowling');
 
 INSERT INTO genre (name, description) VALUES
-('Historical Fiction', 'Historical fiction is a literary genre in which the plot takes place in a setting located in the past'),
-('Science Fiction', 'Science fiction is a genre of speculative fiction that typically deals with imaginative and futuristic concepts'),
-('Fantasy', 'Fantasy is a genre of speculative fiction set in a fictional universe, often inspired by myth and folklore');
+('Historical Fiction', 'Plot takes place in a setting located in the past'),
+('Science Fiction', 'Deals with imaginative and futuristic concepts'),
+('Fantasy', 'Set in a fictional universe, often inspired by myth and folklore'),
+('Mystery', 'Involves the solving of a crime or puzzle'),
+('Romance', 'Focuses on romantic relationships'),
+('Thriller', 'Generates intense excitement, suspense, and anticipation'),
+('Horror', 'Intends to frighten, scare, or startle its readers'),
+('Adventure', 'Involves exciting journeys or experiences'),
+('Biography', 'Tells the life story of a person'),
+('Self-Help', 'Provides guidance and advice for personal improvement');
 
 
 INSERT INTO book (title, num_pages, publication_year, author, book_genre, librarian_username) VALUES 
