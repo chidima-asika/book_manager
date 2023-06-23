@@ -666,4 +666,15 @@ INSERT INTO user_review_book (bookId, username, reviewId) VALUES
 (1, 'jane_doe_22', 5);
 
 
+-- for testing ONLY
+
+SELECT username FROM user;
+UNION
+SELECT username FROM librarian;
+
+
+select * from book where bookId = 1;
+
+
+SELECT * FROM book_club;
 

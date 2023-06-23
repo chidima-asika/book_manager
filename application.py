@@ -735,7 +735,7 @@ def view_item(connection, entity, item_id=None):
     if table_name and id_column:
         try:
             with connection.cursor() as cursor:
-                cursor.callproc('view_item_proc', (entity, item_id, id_column))
+                cursor.callproc('view_item_proc', (entity, id_column, item_id))
                 results = cursor.fetchall()
 
             if results:
