@@ -26,6 +26,7 @@ table_mapping = {
     "book": ("book", "bookId"),
     "review": ("reviews", "reviewId"),
     "book_club": ("book_club", "club_name"),
+    # "book_club_members": ("book_club_members", "member"),
     "author": ("author", "first_last_name"),
     "genre": ("genre", "name"),
     "book_user": ("book_user", "username"),
@@ -216,32 +217,25 @@ def create_book(connection, username):
     try:
         with connection.cursor() as cursor:
             title = input("Enter the title: ")
-            author = input("Enter the author's full name: ")
-
-            if not validate_instance_exists(connection, 'author', 'first_last_name', author):
-                print(
-                    "Author not found in the database. Please create the author before creating a book.")
-                return
-
-            book_genre = input("Enter the genre name: ")
-
-            if not validate_instance_exists(connection, 'genre', 'name', book_genre):
-                print(
-                    "Genre not found in the database. Please create the genre before creating a book.")
-                return
-
             num_pages = int(input("Enter the number of pages: "))
             publication_year = int(input("Enter the publication year: "))
-
+            author = input("Enter the author's full name: ")
+            book_genre = input("Enter the genre name: ")
             librarian_username = username
+
+            if not validate_instance_exists(connection, 'author', 'first_last_name', author):
+                print("Author not found in the database. Please create the author before creating a book.")
+                return
+
+            if not validate_instance_exists(connection, 'genre', 'name', book_genre):
+                print("Genre not found in the database. Please create the genre before creating a book.")
+                return
 
             if validate_instance_exists(connection, 'book', 'title', title):
                 print("The book already exists in the database.")
                 return
 
-            query = "INSERT INTO book (title, author, num_pages, publication_year, book_genre, librarian_username) " \
-                    "VALUES (%s, %s, %s, %s, %s, %s)"
-            cursor.execute(query, (title, author, num_pages, publication_year, book_genre, librarian_username))
+            cursor.callproc('create_book', (title, num_pages, publication_year, author, book_genre, librarian_username))
             connection.commit()
             print("Book created successfully")
 
@@ -385,7 +379,7 @@ def user_menu(connection, username):
             other_users_menu(connection, username)
         elif choice == "7":
             new_value = input("What would you like to change you password to?:")
-            update_value(connection, "user", "password", new_value, "username", username)
+            update_value(connection, "users", "password", new_value, "username", username)
         elif choice == "8":
             print("Logged out")
             break
@@ -401,26 +395,26 @@ def user_books_menu(connection, username):
         print("3. Add a Book")
         print("4. View your Books")
         print("5. Update Status of your Book")
-        print("6. Go Back")
+        print("6. Delete a book from your Books")
+        print("7. Go Back")
         choice = input("Enter your choice: ")
 
         if choice not in ["1", "4"]:
             book_id = input("Enter book id: ")
-
         if choice == "1":
             view_item(connection, "book")
         elif choice == "2":
             view_item(connection, "book", book_id)
         elif choice == "3":
-            add_book(connection, username, book_id)
-            # these can be one function b/c one error should stop function
-            update_status(connection, username, book_id)
+            if add_book(connection, username, book_id):
+                update_status(connection, username, book_id)
         elif choice == "4":
             view_item(connection, "book_user", username)
         elif choice == "5":
-            # need to validate that book exists (we should extrapoalte this)
             update_status(connection, username, book_id)
         elif choice == "6":
+            delete_item_junction(connection, "book_user", "username", username, "bookId", book_id)
+        elif choice == "7":
             break
         else:
             print("Invalid choice. Please try again.")
@@ -431,19 +425,30 @@ def user_books_menu(connection, username):
 def add_book(connection, username, book_id):
     try:
         with connection.cursor() as cursor:
-            query = "INSERT INTO book_user (bookId, username) VALUES (%s, '%')"
+            query = "INSERT INTO book_user (bookId, username) VALUES (%s, %s)"
             cursor.execute(query, (book_id, username))
             connection.commit()
             print("Book added successfully")
+            return True
 
     except Exception as e:
         print("Error occurred while adding the book:", e)
+        return False
 
 
 # Call the login function to start the login process
 def update_status(connection, username, book_id):
     try:
         with connection.cursor() as cursor:
+            query = "SELECT * FROM book_user WHERE username = %s AND bookId = %s"
+            cursor.execute(query, (username, book_id))
+            result = cursor.fetchone()
+
+            if result is None:
+                print("No book found for the provided username and book ID.")
+                print("Please add the book before updating the status.")
+                return
+
             print("Book Status Options:")
             print("1: Read")
             print("2: Currently Reading")
@@ -510,19 +515,27 @@ def user_reviews_menu(connection, username):
     while True:
         print("Reviews Menu:")
         print("1. Write a Review for a Book")
-        print("2. Update a Review Rating")
-        print("3. Go Back")
+        print("2. View All Reviews")
+        print("3. View a Review")
+        print("4. Delete a Review")
+        print("5. Go Back")
         choice = input("Enter your choice: ")
 
+        if choice in ["1"]:
+            book_id = input("Enter Book ID: ")
+        elif choice in ["3", "4"]:
+            review_id = input("Enter Review ID: ")
 
         if choice == "1":
-            book_id = input("Enter Book ID: ")
             create_review(connection, username, book_id)
         elif choice == "2":
-            new_value = input ("What is the new rating: ")
-            where_value = input("Enter Review ID: ")
-            update_value(connection, "reviews", "rating", new_value, "reviewId", where_value)
+            view_item(connection, "reviews")
         elif choice == "3":
+            view_item(connection, "rewiews", review_id)
+        elif choice == "4":
+            delete_item_junction(connection, "user_review_book", "bookId", book_id, 
+                                 "username", username, "reviewId", review_id)
+        elif choice == "5":
             break
         else:
             print("Invalid choice. Please try again.")
@@ -552,7 +565,6 @@ def create_review(connection, username, book_id):
 
 # _______________________ unique user_reviews_menu FUNCTIONS END _________________________#
 
-# _______________________ unique user_books_menu FUNCTIONS END _________________________#
 
 def user_book_clubs_menu(connection, username):
     while True:
@@ -633,7 +645,6 @@ def other_users_menu(connection, username):
         print("3. View Users Who Follow You")
         print("4. View Number of Users You Follow")
         print("5. View Number of Followers")
-        print("6. Follow a User")
         print("7. Unfollow a User")
         print("8. Go Back")
         choice = input("Enter your choice: ")
@@ -645,20 +656,20 @@ def other_users_menu(connection, username):
                 print("Cannot enter your own username. Please try again.")
                 return
 
-            if not validate_instance_exists(connection, 'user', 'username', second_username):
+            if not validate_instance_exists(connection, 'users', 'username', second_username):
                 print("User does not exist. Please try again.")
                 return
 
         if choice == "1":
-            view_item(connection, "user")
+            view_item(connection)
         elif choice == "2":
-            view_column_items(connection, "following_username", "user_follows_user", "username", username)
+            view_column_items(connection, "following_username", "user_follows_user", "username", item_id=username)
         elif choice == "3":
-            view_column_items(connection, "username", "user_follows_user", "following_username", username)
+            view_column_items(connection, "username", "user_follows_user", "following_username", item_id=username)
         elif choice == "4":
-            view_column_items(connection, "num_following", "user", "username", username)
+            view_column_items(connection, "num_folowing", "user", "username", item_id=username)
         elif choice == "5":
-            view_column_items(connection, "num_followers", "user", "username", username)
+            view_column_items(connection, "num_followers", "user", "username", item_id=username)
         elif choice == "6":
             follow_user(connection, username, second_username)
         elif choice == "7":
@@ -747,7 +758,7 @@ def view_item(connection, entity, item_id=None):
     if table_name and id_column:
         try:
             with connection.cursor() as cursor:
-                cursor.callproc('view_item_proc', (entity, item_id, id_column))
+                cursor.callproc('view_item_proc', (entity, id_column, item_id))
                 results = cursor.fetchall()
 
             if results:
@@ -806,9 +817,22 @@ def validate_instance_exists(connection, table_name, column_name, value):
         print("Error occurred while validating instance:", e)
         return False
 
+def delete_item_junction(connection, table_name, key1_name, key1_value, key2_name, key2_value, key3_name=None, key3_value=None):
+    try:
+        with connection.cursor() as cursor:
+            cursor.callproc('delete_item_junction', (table_name, key1_name, key1_value, key2_name, key2_value, key3_name, key3_value))
+            result = cursor.fetchone()
+            if result:
+                print(result["message"])
+            else:
+                print("Deletion failed")
+
+    except Exception as e:
+        print("Error occurred while deleting the item:", e)
+
 
 
 # _______________________ GENERAL FUNCTIONS END _________________________#
 
 login()
-hi
+
